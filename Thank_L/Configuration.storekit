@@ -1,0 +1,96 @@
+{
+  "identifier" : "B85F4B8A",
+  "nonRenewingSubscriptions" : [
+    {
+      "adHocOffers" : [
+
+      ],
+      "codeOffers" : [
+
+      ],
+      "displayPrice" : "19.90",
+      "familyShareable" : false,
+      "internalID" : "6450123459",
+      "localizations" : [
+        {
+          "description" : "一次购买，解锁所有高级功能，终身使用",
+          "displayName" : "iBanner 高级版 - 终身解锁",
+          "locale" : "zh_CN"
+        },
+        {
+          "description" : "One-time purchase, unlock all premium features for lifetime",
+          "displayName" : "iBanner Premium - Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.thankl.premium.lifetime",
+      "referenceName" : "Lifetime Premium",
+      "type" : "NonRenewingSubscription"
+    }
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6450123456",
+    "_developerTeamID" : "ABCD123456",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 748108800.0,
+    "_locale" : "zh_CN",
+    "_storefront" : "CHN",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
