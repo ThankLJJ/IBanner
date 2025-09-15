@@ -412,8 +412,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Thank_L/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = IBanner;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "我们需要读取您的健康数据，以提供个性化健康建议。";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "我们需要写入健康记录以帮助您跟踪健康状态。";
+
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -457,8 +456,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Thank_L/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = IBanner;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "我们需要读取您的健康数据，以提供个性化健康建议。";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "我们需要写入健康记录以帮助您跟踪健康状态。";
+
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
