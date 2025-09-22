@@ -47,34 +47,128 @@ struct ContentView: View {
     
     // MARK: - 主视图
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // 输入区域
-                    inputSection
-                    
-                    // 预览区域
-                    previewSection
-                    
-                    // 快速设置区域
-                    quickSettingsSection
-                    
-                    // 操作按钮区域
-                    actionButtonsSection
-                    
-                    // 历史记录和模板快捷入口
-                    quickAccessSection
-                    
-                    Spacer(minLength: 20)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+        // 使用NavigationSplitView为iPad提供更好的布局体验
+        #if os(iOS)
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            // iPad布局：使用NavigationSplitView
+            NavigationSplitView {
+                // 侧边栏：快速操作和设置
+                sidebarContent
+            } detail: {
+                // 主内容区域
+                mainContent
             }
-            .navigationTitle("iBanner")
+            .navigationSplitViewStyle(.balanced)
+        } else {
+            // iPhone布局：使用NavigationView
+            NavigationView {
+                mainContent
+            }
+        }
+        #else
+        // macOS布局：使用NavigationView
+        NavigationView {
+            mainContent
+        }
+        #endif
+    }
+    
+    // MARK: - 侧边栏内容（iPad专用）
+    @ViewBuilder
+    private var sidebarContent: some View {
+        List {
+            Section("快速操作") {
+                NavigationLink {
+                    StyleSettingsView(bannerStyle: $bannerStyle)
+                } label: {
+                    Label("样式设置", systemImage: "paintbrush")
+                }
+                
+                NavigationLink {
+                    TemplateView(bannerStyle: $bannerStyle)
+                } label: {
+                    Label("模板库", systemImage: "doc.text")
+                }
+                
+                NavigationLink {
+                    HistoryView(bannerStyle: $bannerStyle)
+                } label: {
+                    Label("历史记录", systemImage: "clock")
+                        .badge(dataManager.historyList.count)
+                }
+            }
+            
+            Section("预览") {
+                // 小型预览区域
+                VStack(spacing: 8) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(bannerStyle.backgroundColor)
+                            .frame(height: 60)
+                        
+                        Text(bannerStyle.text.isEmpty ? "预览文字" : bannerStyle.text)
+                            .font(.system(
+                                size: 14,
+                                weight: bannerStyle.isBold ? .bold : .regular
+                            ))
+                            .foregroundColor(bannerStyle.textColor)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .padding(.horizontal, 8)
+                    }
+                    
+                    Button("全屏展示") {
+                        showBanner()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                .padding(.vertical, 8)
+            }
+        }
+        .navigationTitle("iBanner")
+        .listStyle(.sidebar)
+    }
+    
+    // MARK: - 主内容区域
+    @ViewBuilder
+    private var mainContent: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // 输入区域
+                inputSection
+                
+                // 预览区域
+                previewSection
+                
+                // 快速设置区域
+                quickSettingsSection
+                
+                // 操作按钮区域
+                actionButtonsSection
+                
+                // 历史记录和模板快捷入口（仅在iPhone上显示）
+                #if os(iOS)
+                if UIDevice.current.userInterfaceIdiom != .pad {
+                    quickAccessSection
+                }
+                #else
+                quickAccessSection
+                #endif
+                
+                Spacer(minLength: 20)
+            }
+            .padding(.horizontal, adaptivePadding)
+            .padding(.vertical, 16)
+        }
+        .navigationTitle("iBanner")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(UIDevice.current.userInterfaceIdiom == .pad ? .inline : .large)
+        #endif
+        .toolbar {
+            // 仅在iPhone上显示工具栏菜单
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.large)
-            #endif
-            .toolbar {
+            if UIDevice.current.userInterfaceIdiom != .pad {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button("样式设置", systemImage: "paintbrush") {
@@ -93,8 +187,27 @@ struct ContentView: View {
                     }
                 }
             }
+            #else
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button("样式设置", systemImage: "paintbrush") {
+                        showingStyleSettings = true
+                    }
+                    
+                    Button("模板库", systemImage: "doc.text") {
+                        showingTemplates = true
+                    }
+                    
+                    Button("历史记录", systemImage: "clock") {
+                        showingHistory = true
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+            #endif
         }
-        .sheet(isPresented: $showingBanner) {
+        .fullScreenCover(isPresented: $showingBanner) {
             BannerDisplayView(bannerStyle: bannerStyle)
         }
         .sheet(isPresented: $showingStyleSettings) {
@@ -112,11 +225,20 @@ struct ContentView: View {
         // }
         .onAppear {
             loadLastUsedStyle()
-            // 免费版本：移除预览次数加载
-            // loadPreviewCount()
+            // 免费版本：移除订阅检查
+            // subscriptionManager.checkSubscriptionStatus()
         }
     }
     
+    // MARK: - 计算属性：自适应边距
+    private var adaptivePadding: CGFloat {
+        #if os(iOS)
+        return UIDevice.current.userInterfaceIdiom == .pad ? 40 : 20
+        #else
+        return 20
+        #endif
+    }
+
     // MARK: - 输入区域
     private var inputSection: some View {
         VStack(spacing: 16) {

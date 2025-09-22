@@ -15,6 +15,7 @@ import AppKit
 
 /// 横幅全屏展示页面
 /// 支持多种动画效果：滚动、闪烁、渐变、呼吸灯等
+/// 已优化iPad和iPhone的全屏显示体验
 struct BannerDisplayView: View {
     // MARK: - 属性
     let bannerStyle: BannerStyle
@@ -34,9 +35,34 @@ struct BannerDisplayView: View {
     @State private var randomFlashOpacities: [Double] = []
     @State private var randomFlashTimer: Timer?
     
-    // 屏幕尺寸
+    // 屏幕尺寸和设备信息
     @State private var screenSize: CGSize = .zero
     
+    // MARK: - 计算属性：设备适配
+    private var isIPad: Bool {
+        #if os(iOS)
+        return UIDevice.current.userInterfaceIdiom == .pad
+        #else
+        return false
+        #endif
+    }
+    
+    // 自适应字体大小
+    private var adaptiveFontSize: CGFloat {
+        let baseFontSize = bannerStyle.fontSize
+        if isIPad {
+            // iPad上字体稍大一些，考虑更大的屏幕
+            return baseFontSize * 1.2
+        } else {
+            return baseFontSize
+        }
+    }
+    
+    // 自适应边距
+    private var adaptivePadding: CGFloat {
+        return isIPad ? 40 : 20
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -55,16 +81,25 @@ struct BannerDisplayView: View {
             .onDisappear {
                 stopAnimation()
             }
-            // 手势处理
+            // 双击退出手势
             .onTapGesture(count: 2) {
-                // 双击退出
+                // 添加触觉反馈（仅iOS）
+                #if os(iOS)
+                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                impactFeedback.impactOccurred()
+                #endif
                 dismiss()
             }
+            // 下滑退出手势
             .gesture(
                 DragGesture()
                     .onEnded { value in
-                        // 向下滑动退出
+                        // 下滑超过100点退出
                         if value.translation.height > 100 {
+                            #if os(iOS)
+                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                            impactFeedback.impactOccurred()
+                            #endif
                             dismiss()
                         }
                     }
@@ -73,10 +108,10 @@ struct BannerDisplayView: View {
         #if os(iOS)
         .navigationBarHidden(true)
         .statusBarHidden(true)
-        .ignoresSafeArea(.all) // 默认全屏显示
+        .ignoresSafeArea(.all) // 确保全屏显示
         #elseif os(macOS)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all) // 默认全屏显示
+        .ignoresSafeArea(.all) // 确保全屏显示
         #endif
         .preferredColorScheme(.dark) // 确保状态栏为浅色
     }
@@ -146,28 +181,28 @@ struct BannerDisplayView: View {
         }
     }
     
-    // MARK: - 静态文字视图
+    // MARK: - 静态文本视图
     private var staticTextView: some View {
         Text(bannerStyle.text)
             .font(.system(
-                size: bannerStyle.fontSize,
+                size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, adaptivePadding)
             .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
     }
     
-    // MARK: - 滚动文字视图
+    // MARK: - 滚动文本视图
     private var scrollingTextView: some View {
         HStack(spacing: 0) {
-            // 第一个文字实例
+            // 第一个文本
             Text(bannerStyle.text)
                 .font(.system(
-                    size: bannerStyle.fontSize,
+                    size: adaptiveFontSize,
                     weight: bannerStyle.isBold ? .bold : .regular
                 ))
                 .foregroundColor(bannerStyle.textColor)
@@ -178,10 +213,10 @@ struct BannerDisplayView: View {
             Spacer()
                 .frame(width: screenSize.width * 0.5)
             
-            // 第二个文字实例（用于无缝循环）
+            // 第二个文本（用于无缝滚动）
             Text(bannerStyle.text)
                 .font(.system(
-                    size: bannerStyle.fontSize,
+                    size: adaptiveFontSize,
                     weight: bannerStyle.isBold ? .bold : .regular
                 ))
                 .foregroundColor(bannerStyle.textColor)
@@ -196,11 +231,11 @@ struct BannerDisplayView: View {
         )
     }
     
-    // MARK: - 闪烁文字视图
+    // MARK: - 闪烁文本视图
     private var blinkingTextView: some View {
         Text(bannerStyle.text)
             .font(.system(
-                size: bannerStyle.fontSize,
+                size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
@@ -208,7 +243,7 @@ struct BannerDisplayView: View {
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, adaptivePadding)
             .opacity(isBlinking ? 0.3 : 1.0)
             .animation(
                 .easeInOut(duration: 0.8 / bannerStyle.animationSpeed)
@@ -217,11 +252,11 @@ struct BannerDisplayView: View {
             )
     }
     
-    // MARK: - 呼吸灯文字视图
+    // MARK: - 呼吸灯文本视图
     private var breathingTextView: some View {
         Text(bannerStyle.text)
             .font(.system(
-                size: bannerStyle.fontSize,
+                size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
@@ -229,7 +264,7 @@ struct BannerDisplayView: View {
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, adaptivePadding)
             .opacity(breathingOpacity)
             .scaleEffect(breathingOpacity)
             .animation(
@@ -239,11 +274,11 @@ struct BannerDisplayView: View {
             )
     }
     
-    // MARK: - 逐字显示文字视图
+    // MARK: - 打字机文本视图
     private var typewriterTextView: some View {
         Text(typewriterText)
             .font(.system(
-                size: bannerStyle.fontSize,
+                size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
@@ -251,20 +286,20 @@ struct BannerDisplayView: View {
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, adaptivePadding)
             .onAppear {
                 startTypewriterAnimation()
             }
     }
     
-    // MARK: - 随机闪现文字视图
+    // MARK: - 随机闪烁文本视图
     private var randomFlashTextView: some View {
         ZStack {
             ForEach(0..<randomFlashPositions.count, id: \.self) { index in
                 if index < randomFlashOpacities.count {
                     Text(bannerStyle.text)
                         .font(.system(
-                            size: bannerStyle.fontSize * 0.8, // 稍微小一点避免重叠
+                            size: adaptiveFontSize * 0.8, // 稍微小一点避免重叠
                             weight: bannerStyle.isBold ? .bold : .regular
                         ))
                         .foregroundColor(bannerStyle.textColor)
