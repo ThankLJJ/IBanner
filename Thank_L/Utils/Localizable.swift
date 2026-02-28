@@ -19,6 +19,10 @@ enum L10n {
         static let save = NSLocalizedString("app.save", value: "Save", comment: "Save button")
         static let clear = NSLocalizedString("app.clear", value: "Clear", comment: "Clear button")
         static let search = NSLocalizedString("app.search", value: "Search", comment: "Search placeholder")
+        static let confirm = NSLocalizedString("app.confirm", value: "Confirm", comment: "Confirm button")
+        static let close = NSLocalizedString("app.close", value: "Close", comment: "Close button")
+        static let loading = NSLocalizedString("app.loading", value: "Loading...", comment: "Loading text")
+        static let remove = NSLocalizedString("app.remove", value: "Remove", comment: "Remove button")
     }
 
     // MARK: - Navigation
@@ -32,6 +36,7 @@ enum L10n {
     // MARK: - Content
     enum Content {
         static let bannerContent = NSLocalizedString("content.bannerContent", value: "Banner Content", comment: "Banner content label")
+        static let content = NSLocalizedString("content.content", value: "Content", comment: "Content label")
         static let inputPlaceholder = NSLocalizedString("content.inputPlaceholder", value: "Enter text to display...\nEmoji supported 😊", comment: "Input placeholder")
         static let preview = NSLocalizedString("content.preview", value: "Preview", comment: "Preview label")
         static let previewText = NSLocalizedString("content.previewText", value: "Preview Text", comment: "Preview placeholder text")
@@ -43,7 +48,9 @@ enum L10n {
     enum QuickSettings {
         static let title = NSLocalizedString("quick.title", value: "Quick Settings", comment: "Quick settings title")
         static let colorTheme = NSLocalizedString("quick.colorTheme", value: "Color Theme", comment: "Color theme label")
+        static let color = NSLocalizedString("quick.color", value: "Color", comment: "Color label")
         static let animationEffect = NSLocalizedString("quick.animationEffect", value: "Animation Effect", comment: "Animation effect label")
+        static let animation = NSLocalizedString("quick.animation", value: "Animation", comment: "Animation label")
     }
 
     // MARK: - Color Themes
@@ -108,6 +115,11 @@ enum L10n {
         static let imageBackground = NSLocalizedString("style.imageBackground", value: "Image", comment: "Image background type")
         static let backgroundImage = NSLocalizedString("style.backgroundImage", value: "Background Image", comment: "Background image label")
         static let selectImage = NSLocalizedString("style.selectImage", value: "Tap to select background image", comment: "Select image hint")
+        static let selectBackgroundImage = NSLocalizedString("style.selectBackgroundImage", value: "Select Background Image", comment: "Select background image title")
+        static let selectFromAlbum = NSLocalizedString("style.selectFromAlbum", value: "Select from Album", comment: "Select from album")
+        static let selectFromFile = NSLocalizedString("style.selectFromFile", value: "Select from File", comment: "Select from file")
+        static let removeBackgroundImage = NSLocalizedString("style.removeBackgroundImage", value: "Remove Background Image", comment: "Remove background image")
+        static let selectedImage = NSLocalizedString("style.selectedImage", value: "Selected: %@", comment: "Selected image format")
         static let supportedFormats = NSLocalizedString("style.supportedFormats", value: "JPG, PNG supported", comment: "Supported formats")
         static let removeImage = NSLocalizedString("style.removeImage", value: "Remove", comment: "Remove image button")
         static let imageOpacity = NSLocalizedString("style.imageOpacity", value: "Image Opacity", comment: "Image opacity label")
@@ -176,8 +188,10 @@ enum L10n {
     enum History {
         static let title = NSLocalizedString("history.title", value: "History", comment: "History title")
         static let empty = NSLocalizedString("history.empty", value: "No history yet", comment: "Empty history message")
+        static let emptyHint = NSLocalizedString("history.emptyHint", value: "Records will appear here after using the banner display feature", comment: "Empty history hint")
         static let clearAll = NSLocalizedString("history.clearAll", value: "Clear All", comment: "Clear all history")
-        static let confirmClear = NSLocalizedString("history.confirmClear", value: "Clear all history?", comment: "Confirm clear message")
+        static let confirmClear = NSLocalizedString("history.confirmClear", value: "Clear all history?", comment: "Confirm clear title")
+        static let confirmClearMessage = NSLocalizedString("history.confirmClearMessage", value: "This action cannot be undone.", comment: "Confirm clear message")
         static let records = NSLocalizedString("history.records", value: "%d records", comment: "Records count")
     }
 
@@ -192,8 +206,16 @@ enum L10n {
         static let premium = NSLocalizedString("subscription.premium", value: "Premium Version", comment: "Premium title")
         static let lifetime = NSLocalizedString("subscription.lifetime", value: "Lifetime Unlock", comment: "Lifetime subscription")
         static let lifetimeDesc = NSLocalizedString("subscription.lifetimeDesc", value: "One-time purchase, lifetime use", comment: "Lifetime description")
+        static let lifetimeDescFull = NSLocalizedString("subscription.lifetimeDescFull", value: "One-time purchase, enjoy unlimited banner display experience for life", comment: "Full lifetime description")
+        static let lifetimeGuarantee = NSLocalizedString("subscription.lifetimeGuarantee", value: "One-time purchase, lifetime use, no need to worry about renewals", comment: "Lifetime guarantee")
         static let restore = NSLocalizedString("subscription.restore", value: "Restore Purchase", comment: "Restore purchase button")
         static let features = NSLocalizedString("subscription.features", value: "Premium Features", comment: "Premium features title")
+        static let unlockAll = NSLocalizedString("subscription.unlockAll", value: "Unlock All Premium Features", comment: "Unlock all features")
+        static let selectPlan = NSLocalizedString("subscription.selectPlan", value: "Select a Plan", comment: "Select plan title")
+        static let recommended = NSLocalizedString("subscription.recommended", value: "Recommended", comment: "Recommended badge")
+        static let oneTime = NSLocalizedString("subscription.oneTime", value: "One-time", comment: "One-time payment")
+        static let termsOfUse = NSLocalizedString("subscription.termsOfUse", value: "Terms of Use", comment: "Terms of use")
+        static let privacyPolicy = NSLocalizedString("subscription.privacyPolicy", value: "Privacy Policy", comment: "Privacy policy")
     }
 
     // MARK: - Premium Features

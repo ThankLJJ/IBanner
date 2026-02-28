@@ -45,11 +45,11 @@ struct SubscriptionView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .navigationTitle("升级高级版")
+            .navigationTitle(L10n.Subscription.premium)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("关闭") {
+                    Button(L10n.App.close) {
                         dismiss()
                     }
                 }
@@ -84,13 +84,13 @@ struct SubscriptionView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                
-                Text("解锁全部高级功能")
+
+                Text(L10n.Subscription.unlockAll)
                     .font(.title)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
-                
-                Text("一次购买，终身享受无限制的横幅展示体验")
+
+                Text(L10n.Subscription.lifetimeDescFull)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -102,12 +102,12 @@ struct SubscriptionView: View {
     private var featuresSection: some View {
         VStack(spacing: 16) {
             HStack {
-                Text("高级功能")
+                Text(L10n.Subscription.features)
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
             }
-            
+
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
@@ -156,12 +156,12 @@ struct SubscriptionView: View {
     private var subscriptionOptionsSection: some View {
         VStack(spacing: 16) {
             HStack {
-                Text("选择订阅方案")
+                Text(L10n.Subscription.selectPlan)
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
             }
-            
+
             VStack(spacing: 12) {
                 ForEach(SubscriptionConfig.getSubscriptionProducts()) { product in
                     subscriptionOptionCard(product)
@@ -169,14 +169,14 @@ struct SubscriptionView: View {
             }
         }
     }
-    
+
     // MARK: - 订阅选项卡片
     private func subscriptionOptionCard(_ product: SubscriptionProduct) -> some View {
         let isSelected = selectedProduct?.id == product.id
         let isLifetime = product.duration == .lifetime // 检查产品时长是否为终身解锁
-        
+
         print("渲染产品卡片: \(product.displayName), 选中状态: \(isSelected)") // 调试信息：渲染状态
-        
+
         return Button {
             print("订阅方案被点击: \(product.displayName)") // 调试信息：记录点击事件
             selectedProduct = product
@@ -187,16 +187,16 @@ struct SubscriptionView: View {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20))
                     .foregroundColor(isSelected ? .blue : .gray)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(product.displayName)
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
-                        
+
                         if isLifetime {
-                            Text("推荐")
+                            Text(L10n.Subscription.recommended)
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundColor(.white)
@@ -207,24 +207,24 @@ struct SubscriptionView: View {
                                         .fill(Color.orange)
                                 )
                         }
-                        
+
                         Spacer()
                     }
-                    
+
                     Text(product.description)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.leading)
                 }
-                
+
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(product.price)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
-                    
+
                     if isLifetime {
-                        Text("一次付费")
+                        Text(L10n.Subscription.oneTime)
                             .font(.caption)
                             .foregroundColor(.green)
                             .fontWeight(.medium)
@@ -269,8 +269,8 @@ struct SubscriptionView: View {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 18, weight: .bold))
                     }
-                    
-                    Text(isLoading ? "处理中..." : "立即购买")
+
+                    Text(isLoading ? L10n.App.loading : L10n.Subscription.lifetime)
                         .font(.system(size: 18, weight: .bold))
                 }
                 .foregroundColor(.white)
@@ -288,14 +288,14 @@ struct SubscriptionView: View {
             }
             .disabled(isLoading || selectedProduct == nil)
             .opacity(isLoading ? 0.8 : 1.0)
-            
-            Text("一次购买，终身使用，无需担心续费问题")
+
+            Text(L10n.Subscription.lifetimeGuarantee)
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
-    
+
     // MARK: - 底部区域
     private var footerSection: some View {
         VStack(spacing: 16) {
@@ -303,25 +303,25 @@ struct SubscriptionView: View {
             Button {
                 restorePurchases()
             } label: {
-                Text("恢复购买")
+                Text(L10n.Subscription.restore)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.blue)
             }
             .disabled(isLoading)
-            
+
             // 条款和隐私政策
             HStack(spacing: 16) {
-                Button("使用条款") {
+                Button(L10n.Subscription.termsOfUse) {
                     // 打开使用条款
                 }
                 .font(.caption)
                 .foregroundColor(.blue)
-                
+
                 Text("•")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
-                Button("隐私政策") {
+
+                Button(L10n.Subscription.privacyPolicy) {
                     // 打开隐私政策
                 }
                 .font(.caption)

@@ -39,7 +39,7 @@ struct HistoryView: View {
                     historyList
                 }
             }
-            .navigationTitle("历史记录")
+            .navigationTitle(L10n.History.title)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
             #endif
@@ -47,15 +47,15 @@ struct HistoryView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if !dataManager.historyList.isEmpty {
-                        Button("清空") {
+                        Button(L10n.App.clear) {
                             showingDeleteAlert = true
                         }
                         .foregroundColor(.red)
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") {
+                    Button(L10n.App.done) {
                         dismiss()
                     }
                 }
@@ -63,14 +63,14 @@ struct HistoryView: View {
             #else
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("完成") {
+                    Button(L10n.App.done) {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .destructiveAction) {
                     if !dataManager.historyList.isEmpty {
-                        Button("清空") {
+                        Button(L10n.App.clear) {
                             showingDeleteAlert = true
                         }
                         .foregroundColor(.red)
@@ -79,13 +79,13 @@ struct HistoryView: View {
             }
             #endif
         }
-        .alert("清空历史记录", isPresented: $showingDeleteAlert) {
-            Button("取消", role: .cancel) { }
-            Button("清空", role: .destructive) {
+        .alert(L10n.History.confirmClear, isPresented: $showingDeleteAlert) {
+            Button(L10n.App.cancel, role: .cancel) { }
+            Button(L10n.App.clear, role: .destructive) {
                 dataManager.clearAllHistory()
             }
         } message: {
-            Text("确定要清空所有历史记录吗？此操作无法撤销。")
+            Text(L10n.History.confirmClearMessage)
         }
     }
     
@@ -94,8 +94,8 @@ struct HistoryView: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
-            
-            TextField("搜索历史记录...", text: $searchText)
+
+            TextField(L10n.App.search, text: $searchText)
                 .textFieldStyle(PlainTextFieldStyle())
         }
         .padding(.horizontal, 16)
@@ -117,23 +117,23 @@ struct HistoryView: View {
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Spacer()
-            
+
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
-            
+
             VStack(spacing: 8) {
-                Text("暂无历史记录")
+                Text(L10n.History.empty)
                     .font(.title2)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-                
-                Text("使用横幅展示功能后，记录会显示在这里")
+
+                Text(L10n.History.emptyHint)
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
-            
+
             Spacer()
         }
         .padding(.horizontal, 40)

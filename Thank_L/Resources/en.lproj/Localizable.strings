@@ -11,6 +11,10 @@
 "app.save" = "Save";
 "app.clear" = "Clear";
 "app.search" = "Search";
+"app.confirm" = "Confirm";
+"app.close" = "Close";
+"app.loading" = "Loading...";
+"app.remove" = "Remove";
 
 // Navigation
 "nav.styleSettings" = "Style Settings";
@@ -20,7 +24,8 @@
 
 // Content
 "content.bannerContent" = "Banner Content";
-"content.inputPlaceholder" = "Enter text to display...\nEmoji supported 😊";
+"content.content" = "Content";
+"content.inputPlaceholder" = "Enter text to display...";
 "content.preview" = "Preview";
 "content.previewText" = "Preview Text";
 "content.showBanner" = "Start Display";
@@ -29,7 +34,9 @@
 // Quick Settings
 "quick.title" = "Quick Settings";
 "quick.colorTheme" = "Color Theme";
+"quick.color" = "Color";
 "quick.animationEffect" = "Animation Effect";
+"quick.animation" = "Animation";
 
 // Color Themes
 "theme.classic" = "Classic";
@@ -86,6 +93,11 @@
 "style.imageBackground" = "Image";
 "style.backgroundImage" = "Background Image";
 "style.selectImage" = "Tap to select background image";
+"style.selectBackgroundImage" = "Select Background Image";
+"style.selectFromAlbum" = "Select from Album";
+"style.selectFromFile" = "Select from File";
+"style.removeBackgroundImage" = "Remove Background Image";
+"style.selectedImage" = "Selected: %@";
 "style.supportedFormats" = "JPG, PNG supported";
 "style.removeImage" = "Remove";
 "style.imageOpacity" = "Image Opacity";
@@ -144,8 +156,10 @@
 // History
 "history.title" = "History";
 "history.empty" = "No history yet";
+"history.emptyHint" = "Records will appear here after using the banner display feature";
 "history.clearAll" = "Clear All";
 "history.confirmClear" = "Clear all history?";
+"history.confirmClearMessage" = "This action cannot be undone.";
 "history.records" = "%d records";
 
 // Quick Access
@@ -156,8 +170,16 @@
 "subscription.premium" = "Premium Version";
 "subscription.lifetime" = "Lifetime Unlock";
 "subscription.lifetimeDesc" = "One-time purchase, lifetime use";
+"subscription.lifetimeDescFull" = "One-time purchase, enjoy unlimited banner display experience for life";
+"subscription.lifetimeGuarantee" = "One-time purchase, lifetime use, no need to worry about renewals";
 "subscription.restore" = "Restore Purchase";
 "subscription.features" = "Premium Features";
+"subscription.unlockAll" = "Unlock All Premium Features";
+"subscription.selectPlan" = "Select a Plan";
+"subscription.recommended" = "Recommended";
+"subscription.oneTime" = "One-time";
+"subscription.termsOfUse" = "Terms of Use";
+"subscription.privacyPolicy" = "Privacy Policy";
 
 // Premium Features
 "premium.unlimitedPreview" = "Unlimited Preview";

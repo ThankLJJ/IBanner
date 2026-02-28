@@ -35,13 +35,13 @@ struct TemplateView: View {
                 // 模板列表
                 templateList
             }
-            .navigationTitle("模板库")
+            .navigationTitle(L10n.Template.title)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
             #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") {
+                    Button(L10n.App.done) {
                         dismiss()
                     }
                 }

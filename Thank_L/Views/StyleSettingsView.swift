@@ -102,19 +102,19 @@ struct StyleSettingsView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 20)
             }
-            .navigationTitle("样式设置")
+            .navigationTitle(L10n.Navigation.styleSettings)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
+                    Button(L10n.App.cancel) {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") {
+                    Button(L10n.App.done) {
                         dismiss()
                     }
                     .fontWeight(.semibold)
@@ -498,32 +498,32 @@ struct StyleSettingsView: View {
     // MARK: - 背景设置区域
     private var backgroundSettingsSection: some View {
         VStack(spacing: 16) {
-            Text("背景设置")
+            Text(L10n.StyleSettings.backgroundSettings)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             // 背景类型选择
             VStack(alignment: .leading, spacing: 12) {
-                Text("背景类型")
+                Text(L10n.StyleSettings.backgroundType)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                
+
                 HStack(spacing: 12) {
                     ForEach(BackgroundType.allCases, id: \.self) { type in
                         backgroundTypeButton(type)
                     }
                 }
             }
-            
+
             // 图片背景设置
             if bannerStyle.backgroundType == .image {
                 Divider()
-                
+
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("背景图片")
+                    Text(L10n.StyleSettings.backgroundImage)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                    
+
                     // 图片预览区域 - 可直接点击选择
                     Button(action: {
                         showingImagePicker = true
@@ -541,7 +541,7 @@ struct StyleSettingsView: View {
                                                 .foregroundColor(Color.blue.opacity(0.3))
                                         )
                                 )
-                            
+
                             if let imagePath = bannerStyle.backgroundImagePath,
                                let url = URL(string: "file://" + imagePath) {
                                 // 显示已选择的图片
@@ -557,7 +557,7 @@ struct StyleSettingsView: View {
                                         Image(systemName: "photo")
                                             .font(.system(size: 24))
                                             .foregroundColor(.blue)
-                                        Text("加载中...")
+                                        Text(L10n.App.loading)
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
@@ -568,10 +568,10 @@ struct StyleSettingsView: View {
                                     Image(systemName: "photo.badge.plus")
                                         .font(.system(size: 32))
                                         .foregroundColor(.blue)
-                                    Text("点击选择背景图片")
+                                    Text(L10n.StyleSettings.selectImage)
                                         .font(.subheadline)
                                         .foregroundColor(.blue)
-                                    Text("支持 JPG、PNG 格式")
+                                    Text(L10n.StyleSettings.supportedFormats)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -579,17 +579,17 @@ struct StyleSettingsView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    
+
                     // 显示当前选中的图片
                     if bannerStyle.backgroundType == .image,
                        let imagePath = bannerStyle.backgroundImagePath,
                        !imagePath.isEmpty {
                         HStack {
-                            Text("已选择: \(URL(fileURLWithPath: imagePath).lastPathComponent)")
+                            Text(String(format: L10n.StyleSettings.selectedImage, URL(fileURLWithPath: imagePath).lastPathComponent))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            
-                            Button("移除") {
+
+                            Button(L10n.App.remove) {
                                  // 删除图片文件
                                  BannerDataManager.shared.deleteBackgroundImage(at: imagePath)
                                  // 清除路径
@@ -600,23 +600,23 @@ struct StyleSettingsView: View {
                              .font(.caption)
                         }
                     }
-                    
+
                     // 图片透明度设置
                     if bannerStyle.backgroundImagePath != nil {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text("图片透明度")
+                                Text(L10n.StyleSettings.imageOpacity)
                                 Spacer()
                                 Text("\(Int(bannerStyle.backgroundImageOpacity * 100))%")
                                     .foregroundColor(.secondary)
                             }
-                            
+
                             Slider(
                                 value: $bannerStyle.backgroundImageOpacity,
                                 in: 0.1...1.0,
                                 step: 0.1
                             ) {
-                                Text("图片透明度")
+                                Text(L10n.StyleSettings.imageOpacity)
                             } minimumValueLabel: {
                                 Text("10%")
                                     .font(.caption)
@@ -645,47 +645,47 @@ struct StyleSettingsView: View {
     // MARK: - 动画设置区域
     private var animationSettingsSection: some View {
         VStack(spacing: 16) {
-            Text("动画效果")
+            Text(L10n.StyleSettings.animationSettings)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             // 动画类型选择
             VStack(alignment: .leading, spacing: 12) {
-                Text("动画类型")
+                Text(L10n.StyleSettings.animationType)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                
+
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
                     ForEach(AnimationType.allCases, id: \.self) { animationType in
                         animationTypeButton(animationType)
                     }
                 }
             }
-            
+
             // 动画速度设置（仅在有动画时显示）
             if bannerStyle.animationType != .none {
                 Divider()
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("动画速度")
+                        Text(L10n.StyleSettings.animationSpeed)
                         Spacer()
                         Text(String(format: "%.1fx", bannerStyle.animationSpeed))
                             .foregroundColor(.secondary)
                     }
-                    
+
                     Slider(
                         value: $bannerStyle.animationSpeed,
                         in: 0.5...3.0,
                         step: 0.1
                     ) {
-                        Text("动画速度")
+                        Text(L10n.StyleSettings.animationSpeed)
                     } minimumValueLabel: {
-                        Text("慢")
+                        Text(L10n.StyleSettings.speedSlow)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } maximumValueLabel: {
-                        Text("快")
+                        Text(L10n.StyleSettings.speedFast)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -706,17 +706,17 @@ struct StyleSettingsView: View {
     // MARK: - 预设样式区域
     private var presetStylesSection: some View {
         VStack(spacing: 16) {
-            Text("快速样式")
+            Text(L10n.StyleSettings.presetStyles)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-                presetStyleButton("演唱会", .red, .white, .blink)
-                presetStyleButton("生日派对", .pink, .white, .gradient)
-                presetStyleButton("接机牌", .white, .black, .none)
-                presetStyleButton("代驾服务", .blue, .white, .breathing)
-                presetStyleButton("谢谢", .green, .white, .none)
-                presetStyleButton("请稍等", .yellow, .black, .blink)
+                presetStyleButton(L10n.PresetStyle.concert, .red, .white, .blink)
+                presetStyleButton(L10n.PresetStyle.birthday, .pink, .white, .gradient)
+                presetStyleButton(L10n.PresetStyle.pickup, .white, .black, .none)
+                presetStyleButton(L10n.PresetStyle.driver, .blue, .white, .breathing)
+                presetStyleButton(L10n.PresetStyle.thanks, .green, .white, .none)
+                presetStyleButton(L10n.PresetStyle.wait, .yellow, .black, .blink)
             }
         }
         .padding(16)
@@ -735,28 +735,28 @@ struct StyleSettingsView: View {
         NavigationView {
             VStack(spacing: 20) {
                 ColorPicker(
-                    "选择颜色",
+                    L10n.StyleSettings.selectColor,
                     selection: $tempColor,
                     supportsOpacity: false
                 )
                 .labelsHidden()
-                
+
                 Spacer()
             }
             .padding()
-            .navigationTitle(colorPickerType == .text ? "文字颜色" : "背景颜色")
+            .navigationTitle(colorPickerType == .text ? L10n.StyleSettings.textSettingsTitle : L10n.StyleSettings.bgColorTitle)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
+                    Button(L10n.App.cancel) {
                         showingColorPicker = false
                     }
                 }
-                
+
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("确定") {
+                    Button(L10n.App.confirm) {
                         if colorPickerType == .text {
                             bannerStyle.textColor = tempColor
                         } else {
@@ -943,30 +943,30 @@ struct StyleSettingsView: View {
     private var imagePickerSheet: some View {
         NavigationView {
             VStack(spacing: 20) {
-                Text("选择背景图片")
+                Text(L10n.StyleSettings.selectBackgroundImage)
                     .font(.headline)
-                
+
                 #if os(iOS)
-                 Button("从相册选择") {
+                 Button(L10n.StyleSettings.selectFromAlbum) {
                      // 延迟执行以避免模态视图冲突
                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                          // 创建协调器
                          imagePickerCoordinator = ImagePickerCoordinator { image in
                              selectedUIImage = image
                              selectedImage = Image(uiImage: image)
-                             
+
                              // 保存图片并获取路径
                              if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
                                  bannerStyle.backgroundImagePath = savedPath
                              }
-                             
+
                              showingImagePicker = false
                          }
-                         
+
                          let imagePicker = UIImagePickerController()
                          imagePicker.sourceType = .photoLibrary
                          imagePicker.delegate = imagePickerCoordinator
-                         
+
                          // 获取当前最顶层的视图控制器
                          if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                             let window = windowScene.windows.first {
@@ -980,22 +980,22 @@ struct StyleSettingsView: View {
                  }
                  .buttonStyle(.borderedProminent)
                  #elseif os(macOS)
-                Button("从文件选择") {
+                Button(L10n.StyleSettings.selectFromFile) {
                     let panel = NSOpenPanel()
                     panel.allowedContentTypes = [.image]
                     panel.allowsMultipleSelection = false
-                    
+
                     if panel.runModal() == .OK,
                        let url = panel.url,
                        let image = NSImage(contentsOf: url) {
                         selectedNSImage = image
                         selectedImage = Image(nsImage: image)
-                        
+
                         // 保存图片并获取路径
                         if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
                             bannerStyle.backgroundImagePath = savedPath
                         }
-                        
+
                         showingImagePicker = false
                     }
                 }
@@ -1004,16 +1004,16 @@ struct StyleSettingsView: View {
                 .foregroundColor(.white)
                 .cornerRadius(8)
                 #endif
-                
+
                 if selectedImage != nil {
-                    Button("移除背景图片") {
+                    Button(L10n.StyleSettings.removeBackgroundImage) {
                         selectedImage = nil
                         #if os(iOS)
                         selectedUIImage = nil
                         #elseif os(macOS)
                         selectedNSImage = nil
                         #endif
-                        
+
                         // 删除已保存的图片
                         if let imagePath = bannerStyle.backgroundImagePath {
                             BannerDataManager.shared.deleteBackgroundImage(at: imagePath)
@@ -1026,17 +1026,17 @@ struct StyleSettingsView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
-                
+
                 Spacer()
             }
             .padding()
-            .navigationTitle("背景图片")
+            .navigationTitle(L10n.StyleSettings.backgroundImage)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
+                    Button(L10n.App.cancel) {
                         showingImagePicker = false
                     }
                 }

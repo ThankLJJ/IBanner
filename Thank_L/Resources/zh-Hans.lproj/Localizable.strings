@@ -11,6 +11,10 @@
 "app.save" = "保存";
 "app.clear" = "清空";
 "app.search" = "搜索";
+"app.confirm" = "确定";
+"app.close" = "关闭";
+"app.loading" = "加载中...";
+"app.remove" = "移除";
 
 // Navigation
 "nav.styleSettings" = "样式设置";
@@ -20,7 +24,8 @@
 
 // Content
 "content.bannerContent" = "横幅内容";
-"content.inputPlaceholder" = "输入要显示的文字...\n支持 Emoji 😊";
+"content.content" = "内容";
+"content.inputPlaceholder" = "输入要展示的文字...";
 "content.preview" = "预览效果";
 "content.previewText" = "预览文字";
 "content.showBanner" = "开始展示";
@@ -29,7 +34,9 @@
 // Quick Settings
 "quick.title" = "快速设置";
 "quick.colorTheme" = "颜色主题";
+"quick.color" = "颜色";
 "quick.animationEffect" = "动画效果";
+"quick.animation" = "动画";
 
 // Color Themes
 "theme.classic" = "经典";
@@ -86,6 +93,11 @@
 "style.imageBackground" = "图片背景";
 "style.backgroundImage" = "背景图片";
 "style.selectImage" = "点击选择背景图片";
+"style.selectBackgroundImage" = "选择背景图片";
+"style.selectFromAlbum" = "从相册选择";
+"style.selectFromFile" = "从文件选择";
+"style.removeBackgroundImage" = "移除背景图片";
+"style.selectedImage" = "已选择: %@";
 "style.supportedFormats" = "支持 JPG、PNG 格式";
 "style.removeImage" = "移除";
 "style.imageOpacity" = "图片透明度";
@@ -144,8 +156,10 @@
 // History
 "history.title" = "历史记录";
 "history.empty" = "暂无历史记录";
+"history.emptyHint" = "使用横幅展示功能后，记录会显示在这里";
 "history.clearAll" = "清空全部";
-"history.confirmClear" = "确定清空所有历史记录？";
+"history.confirmClear" = "确定要清空所有历史记录吗？";
+"history.confirmClearMessage" = "此操作无法撤销。";
 "history.records" = "%d条";
 
 // Quick Access
@@ -156,8 +170,16 @@
 "subscription.premium" = "高级版";
 "subscription.lifetime" = "终身解锁";
 "subscription.lifetimeDesc" = "一次购买，终身使用";
+"subscription.lifetimeDescFull" = "一次购买，终身享受无限制的横幅展示体验";
+"subscription.lifetimeGuarantee" = "一次购买，终身使用，无需担心续费问题";
 "subscription.restore" = "恢复购买";
 "subscription.features" = "高级功能";
+"subscription.unlockAll" = "解锁全部高级功能";
+"subscription.selectPlan" = "选择订阅方案";
+"subscription.recommended" = "推荐";
+"subscription.oneTime" = "一次付费";
+"subscription.termsOfUse" = "使用条款";
+"subscription.privacyPolicy" = "隐私政策";
 
 // Premium Features
 "premium.unlimitedPreview" = "无限预览";

@@ -82,7 +82,7 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("iBanner")
+                    Text(L10n.App.name)
                         .font(.system(size: 18, weight: .semibold))
                 }
 
@@ -313,7 +313,7 @@ struct ContentView: View {
     // MARK: - 输入区
     private var inputArea: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("内容")
+            Text(L10n.Content.content)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
@@ -331,7 +331,7 @@ struct ContentView: View {
                 )
                 .overlay(alignment: .topLeading) {
                     if bannerStyle.text.isEmpty {
-                        Text("输入要展示的文字...")
+                        Text(L10n.Content.inputPlaceholder)
                             .font(.system(size: 17))
                             .foregroundStyle(.tertiary)
                             .padding(16)
@@ -345,24 +345,24 @@ struct ContentView: View {
     private var quickActions: some View {
         VStack(alignment: .leading, spacing: 16) {
             // 颜色选择
-            Text("颜色")
+            Text(L10n.QuickSettings.color)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    colorChip("经典", .white, .black)
-                    colorChip("应援", .white, .red)
-                    colorChip("生日", .white, .pink)
-                    colorChip("接机", .black, .white)
-                    colorChip("代驾", .white, .green)
-                    colorChip("谢谢", .white, .orange)
+                    colorChip(L10n.ColorTheme.classic, .white, .black)
+                    colorChip(L10n.ColorTheme.support, .white, .red)
+                    colorChip(L10n.ColorTheme.birthday, .white, .pink)
+                    colorChip(L10n.ColorTheme.pickup, .black, .white)
+                    colorChip(L10n.ColorTheme.driver, .white, .green)
+                    colorChip(L10n.ColorTheme.thanks, .white, .orange)
                 }
             }
 
             // 动画选择
-            Text("动画")
+            Text(L10n.QuickSettings.animation)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
@@ -445,7 +445,7 @@ struct ContentView: View {
             saveStyle()
             showingBanner = true
         } label: {
-            Text("开始展示")
+            Text(L10n.Content.showBanner)
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

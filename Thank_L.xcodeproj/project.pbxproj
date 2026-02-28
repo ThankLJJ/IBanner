@@ -29,22 +29,9 @@
 		0B46C57F2E1F8EFB00DF9AC1 /* Thank_LUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Thank_LUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0B15E9972E1FF50B00EEC8DA /* Exceptions for "Thank_L" folder in "Thank_L" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 0B46C5662E1F8EF800DF9AC1 /* Thank_L */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0B46C5692E1F8EF800DF9AC1 /* Thank_L */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				0B15E9972E1FF50B00EEC8DA /* Exceptions for "Thank_L" folder in "Thank_L" target */,
-			);
 			path = Thank_L;
 			sourceTree = "<group>";
 		};
@@ -205,6 +192,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 0B46C55E2E1F8EF800DF9AC1;
 			minimizedProjectReferenceProxies = 1;
@@ -412,7 +400,6 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Thank_L/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = IBanner;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -456,7 +443,6 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Thank_L/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = IBanner;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
