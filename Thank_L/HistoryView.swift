@@ -325,6 +325,14 @@ struct HistoryView: View {
             return "keyboard"
         case .randomFlash:
             return "sparkles"
+        case .wave:
+            return "water.waves"
+        case .bounce:
+            return "arrow.up.backward"
+        case .particles:
+            return "sparkles"
+        case .led:
+            return "grid"
         }
     }
 }

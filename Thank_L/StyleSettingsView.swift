@@ -123,10 +123,10 @@ struct StyleSettingsView: View {
     // MARK: - 预览区域
     private var previewSection: some View {
         VStack(spacing: 12) {
-            Text("预览效果")
+            Text(L10n.Content.preview)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             // 预览容器
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
@@ -136,8 +136,8 @@ struct StyleSettingsView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                     )
-                
-                Text(bannerStyle.text.isEmpty ? "预览文字" : bannerStyle.text)
+
+                Text(bannerStyle.text.isEmpty ? L10n.Content.previewText : bannerStyle.text)
                     .font(.system(
                         size: min(bannerStyle.fontSize * 0.4, 24),
                         weight: bannerStyle.isBold ? .bold : .regular
@@ -153,25 +153,25 @@ struct StyleSettingsView: View {
     // MARK: - 文字设置区域
     private var textSettingsSection: some View {
         VStack(spacing: 16) {
-            Text("文字设置")
+            Text(L10n.StyleSettings.textSettings)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             // 字体大小设置
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("字体大小")
+                    Text(L10n.StyleSettings.fontSize)
                     Spacer()
                     Text("\(Int(bannerStyle.fontSize))")
                         .foregroundColor(.secondary)
                 }
-                
+
                 Slider(
                     value: $bannerStyle.fontSize,
                     in: 20...100,
                     step: 2
                 ) {
-                    Text("字体大小")
+                    Text(L10n.StyleSettings.fontSize)
                 } minimumValueLabel: {
                     Text("20")
                         .font(.caption)
@@ -182,22 +182,22 @@ struct StyleSettingsView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            
+
             // 粗体开关
             HStack {
-                Text("粗体")
+                Text(L10n.StyleSettings.bold)
                 Spacer()
                 Toggle("", isOn: $bannerStyle.isBold)
             }
-            
+
             Divider()
-            
+
             // 字体样式选择
             VStack(alignment: .leading, spacing: 12) {
-                Text("字体样式")
+                Text(L10n.StyleSettings.fontStyle)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                
+
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
                     ForEach(FontStyle.allCases, id: \.self) { fontStyle in
                         fontStyleButton(fontStyle)
@@ -219,23 +219,23 @@ struct StyleSettingsView: View {
     // MARK: - 颜色设置区域
     private var colorSettingsSection: some View {
         VStack(spacing: 16) {
-            Text("颜色设置")
+            Text(L10n.StyleSettings.colorSettings)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             // 文字颜色
             VStack(alignment: .leading, spacing: 12) {
-                Text("文字颜色")
+                Text(L10n.StyleSettings.textColor)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                
+
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                     ForEach(presetColors, id: \.self) { color in
                         colorButton(color: color, isSelected: bannerStyle.textColor == color) {
                             bannerStyle.textColor = color
                         }
                     }
-                    
+
                     // 自定义颜色按钮
                     customColorButton {
                         colorPickerType = .text
@@ -244,22 +244,22 @@ struct StyleSettingsView: View {
                     }
                 }
             }
-            
+
             Divider()
-            
+
             // 背景颜色
             VStack(alignment: .leading, spacing: 12) {
-                Text("背景颜色")
+                Text(L10n.StyleSettings.backgroundColor)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                
+
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                     ForEach(presetColors, id: \.self) { color in
                         colorButton(color: color, isSelected: bannerStyle.backgroundColor == color) {
                             bannerStyle.backgroundColor = color
                         }
                     }
-                    
+
                     // 自定义颜色按钮
                     customColorButton {
                         colorPickerType = .background

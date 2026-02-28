@@ -1,0 +1,176 @@
+/*
+  Localizable.strings (English)
+  iBanner - LED Banner App
+*/
+
+// App
+"app.name" = "iBanner";
+"app.cancel" = "Cancel";
+"app.done" = "Done";
+"app.delete" = "Delete";
+"app.save" = "Save";
+"app.clear" = "Clear";
+"app.search" = "Search";
+
+// Navigation
+"nav.styleSettings" = "Style Settings";
+"nav.templates" = "Templates";
+"nav.history" = "History";
+"nav.subscription" = "Premium";
+
+// Content
+"content.bannerContent" = "Banner Content";
+"content.inputPlaceholder" = "Enter text to display...\nEmoji supported 😊";
+"content.preview" = "Preview";
+"content.previewText" = "Preview Text";
+"content.showBanner" = "Start Display";
+"content.characterCount" = "%d/100";
+
+// Quick Settings
+"quick.title" = "Quick Settings";
+"quick.colorTheme" = "Color Theme";
+"quick.animationEffect" = "Animation Effect";
+
+// Color Themes
+"theme.classic" = "Classic";
+"theme.support" = "Support";
+"theme.birthday" = "Birthday";
+"theme.pickup" = "Pickup";
+"theme.driver" = "Driver";
+"theme.thanks" = "Thanks";
+
+// Animation Types
+"animation.none" = "None";
+"animation.scroll" = "Scroll";
+"animation.blink" = "Blink";
+"animation.gradient" = "Gradient";
+"animation.breathing" = "Breathing";
+"animation.typewriter" = "Typewriter";
+"animation.randomFlash" = "Random Flash";
+"animation.wave" = "Wave";
+"animation.bounce" = "Bounce";
+"animation.particles" = "Particles";
+"animation.led" = "LED Pixel";
+
+// Animation Descriptions
+"animation.noneDesc" = "Static display, no animation";
+"animation.scrollDesc" = "Text scrolls across screen";
+"animation.blinkDesc" = "Blinking light effect";
+"animation.gradientDesc" = "Rainbow gradient background";
+"animation.breathingDesc" = "Breathing light effect";
+"animation.typewriterDesc" = "Typewriter character effect";
+"animation.randomFlashDesc" = "Random flash effect";
+"animation.waveDesc" = "Wave motion effect";
+"animation.bounceDesc" = "Bouncing spring effect";
+"animation.particlesDesc" = "Floating particle effects";
+"animation.ledDesc" = "LED dot matrix display";
+
+// Scroll Direction
+"scrollDirection.leftToRight" = "Left to Right";
+"scrollDirection.rightToLeft" = "Right to Left";
+"scrollDirection.topToBottom" = "Top to Bottom";
+"scrollDirection.bottomToTop" = "Bottom to Top";
+"scrollDirection.label" = "Scroll Direction";
+
+// Style Settings
+"style.textSettings" = "Text Settings";
+"style.fontSize" = "Font Size";
+"style.bold" = "Bold";
+"style.fontStyle" = "Font Style";
+"style.colorSettings" = "Color Settings";
+"style.textColor" = "Text Color";
+"style.backgroundColor" = "Background Color";
+"style.backgroundSettings" = "Background Settings";
+"style.backgroundType" = "Background Type";
+"style.colorBackground" = "Color";
+"style.imageBackground" = "Image";
+"style.backgroundImage" = "Background Image";
+"style.selectImage" = "Tap to select background image";
+"style.supportedFormats" = "JPG, PNG supported";
+"style.removeImage" = "Remove";
+"style.imageOpacity" = "Image Opacity";
+"style.animationSettings" = "Animation Effects";
+"style.animationType" = "Animation Type";
+"style.animationSpeed" = "Animation Speed";
+"style.speedSlow" = "Slow";
+"style.speedFast" = "Fast";
+"style.presetStyles" = "Quick Styles";
+"style.textSettingsTitle" = "Text Color";
+"style.bgColorTitle" = "Background Color";
+"style.selectColor" = "Select Color";
+
+// Font Styles
+"fontStyle.normal" = "Normal";
+"fontStyle.artistic" = "Artistic";
+"fontStyle.neon" = "Neon";
+"fontStyle.normalDesc" = "Standard font display";
+"fontStyle.artisticDesc" = "Artistic decorative style";
+"fontStyle.neonDesc" = "Neon glowing effect";
+
+// Preset Styles
+"preset.concert" = "Concert";
+"preset.birthday" = "Birthday Party";
+"preset.pickup" = "Pickup Sign";
+"preset.driver" = "Driver Service";
+"preset.thanks" = "Thanks";
+"preset.wait" = "Please Wait";
+
+// Template Categories
+"templateCategory.all" = "All";
+"templateCategory.support" = "Support";
+"templateCategory.party" = "Party";
+"templateCategory.transport" = "Transport";
+"templateCategory.celebration" = "Celebration";
+"templateCategory.communication" = "Communication";
+"templateCategory.custom" = "Custom";
+
+// Templates
+"template.title" = "Templates";
+"template.builtIn" = "Built-in Templates";
+"template.custom" = "My Templates";
+"template.favorites" = "Favorites";
+"template.add" = "Add Template";
+"template.use" = "Use";
+"template.name" = "Template Name";
+"template.concertSupport" = "❤️ I Love You ❤️";
+"template.fanSupport" = "🌟 Go Go! 🌟";
+"template.happyBirthday" = "🎂 Happy Birthday 🎂";
+"template.partyTime" = "🎉 Party Time 🎉";
+"template.airportPickup" = "✈️ Airport Pickup ✈️";
+"template.driverService" = "🚗 Driver Service 🚗";
+"template.thankYou" = "🙏 Thank You 🙏";
+"template.pleaseWait" = "⏰ Please Wait ⏰";
+
+// History
+"history.title" = "History";
+"history.empty" = "No history yet";
+"history.clearAll" = "Clear All";
+"history.confirmClear" = "Clear all history?";
+"history.records" = "%d records";
+
+// Quick Access
+"quickAccess.history" = "History";
+"quickAccess.templates" = "Templates";
+
+// Subscription
+"subscription.premium" = "Premium Version";
+"subscription.lifetime" = "Lifetime Unlock";
+"subscription.lifetimeDesc" = "One-time purchase, lifetime use";
+"subscription.restore" = "Restore Purchase";
+"subscription.features" = "Premium Features";
+
+// Premium Features
+"premium.unlimitedPreview" = "Unlimited Preview";
+"premium.advancedAnimations" = "Advanced Animations";
+"premium.customFonts" = "Custom Fonts";
+"premium.backgroundImages" = "Background Images";
+"premium.exportFeatures" = "Export Features";
+"premium.prioritySupport" = "Priority Support";
+
+// Quick Actions
+"quickAction.styleSettings" = "Style Settings";
+"quickAction.selectTemplate" = "Select Template";
+
+// Info
+"info.developer" = "Thank_L Team";
+"info.version" = "Version";

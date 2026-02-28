@@ -1,0 +1,176 @@
+/*
+  Localizable.strings (Simplified Chinese)
+  iBanner - LED横幅工具
+*/
+
+// App
+"app.name" = "iBanner";
+"app.cancel" = "取消";
+"app.done" = "完成";
+"app.delete" = "删除";
+"app.save" = "保存";
+"app.clear" = "清空";
+"app.search" = "搜索";
+
+// Navigation
+"nav.styleSettings" = "样式设置";
+"nav.templates" = "模板库";
+"nav.history" = "历史记录";
+"nav.subscription" = "高级版";
+
+// Content
+"content.bannerContent" = "横幅内容";
+"content.inputPlaceholder" = "输入要显示的文字...\n支持 Emoji 😊";
+"content.preview" = "预览效果";
+"content.previewText" = "预览文字";
+"content.showBanner" = "开始展示";
+"content.characterCount" = "%d/100";
+
+// Quick Settings
+"quick.title" = "快速设置";
+"quick.colorTheme" = "颜色主题";
+"quick.animationEffect" = "动画效果";
+
+// Color Themes
+"theme.classic" = "经典";
+"theme.support" = "应援";
+"theme.birthday" = "生日";
+"theme.pickup" = "接机";
+"theme.driver" = "代驾";
+"theme.thanks" = "谢谢";
+
+// Animation Types
+"animation.none" = "无动效";
+"animation.scroll" = "滚动";
+"animation.blink" = "闪烁";
+"animation.gradient" = "渐变";
+"animation.breathing" = "呼吸灯";
+"animation.typewriter" = "逐字显示";
+"animation.randomFlash" = "随机闪现";
+"animation.wave" = "波浪";
+"animation.bounce" = "弹跳";
+"animation.particles" = "粒子";
+"animation.led" = "LED像素";
+
+// Animation Descriptions
+"animation.noneDesc" = "静态显示，无动画效果";
+"animation.scrollDesc" = "文字从右向左滚动显示";
+"animation.blinkDesc" = "文字闪烁效果，类似灯牌";
+"animation.gradientDesc" = "彩虹渐变背景效果";
+"animation.breathingDesc" = "呼吸灯效果，透明度变化";
+"animation.typewriterDesc" = "文字逐个字符显示，打字机效果";
+"animation.randomFlashDesc" = "文字在屏幕随机位置闪现，炫酷效果";
+"animation.waveDesc" = "波浪起伏效果，字符依次浮动";
+"animation.bounceDesc" = "弹跳效果，弹簧动画";
+"animation.particlesDesc" = "粒子漂浮特效，星光点点";
+"animation.ledDesc" = "LED点阵显示效果，模拟真实灯牌";
+
+// Scroll Direction
+"scrollDirection.leftToRight" = "从右向左";
+"scrollDirection.rightToLeft" = "从左向右";
+"scrollDirection.topToBottom" = "从下向上";
+"scrollDirection.bottomToTop" = "从上向下";
+"scrollDirection.label" = "滚动方向";
+
+// Style Settings
+"style.textSettings" = "文字设置";
+"style.fontSize" = "字体大小";
+"style.bold" = "粗体";
+"style.fontStyle" = "字体样式";
+"style.colorSettings" = "颜色设置";
+"style.textColor" = "文字颜色";
+"style.backgroundColor" = "背景颜色";
+"style.backgroundSettings" = "背景设置";
+"style.backgroundType" = "背景类型";
+"style.colorBackground" = "纯色背景";
+"style.imageBackground" = "图片背景";
+"style.backgroundImage" = "背景图片";
+"style.selectImage" = "点击选择背景图片";
+"style.supportedFormats" = "支持 JPG、PNG 格式";
+"style.removeImage" = "移除";
+"style.imageOpacity" = "图片透明度";
+"style.animationSettings" = "动画效果";
+"style.animationType" = "动画类型";
+"style.animationSpeed" = "动画速度";
+"style.speedSlow" = "慢";
+"style.speedFast" = "快";
+"style.presetStyles" = "快速样式";
+"style.textSettingsTitle" = "文字颜色";
+"style.bgColorTitle" = "背景颜色";
+"style.selectColor" = "选择颜色";
+
+// Font Styles
+"fontStyle.normal" = "普通字体";
+"fontStyle.artistic" = "艺术字";
+"fontStyle.neon" = "霓虹字";
+"fontStyle.normalDesc" = "标准字体显示";
+"fontStyle.artisticDesc" = "艺术字体效果，带有装饰性边框";
+"fontStyle.neonDesc" = "霓虹灯效果，发光字体";
+
+// Preset Styles
+"preset.concert" = "演唱会";
+"preset.birthday" = "生日派对";
+"preset.pickup" = "接机牌";
+"preset.driver" = "代驾服务";
+"preset.thanks" = "谢谢";
+"preset.wait" = "请稍等";
+
+// Template Categories
+"templateCategory.all" = "全部";
+"templateCategory.support" = "应援";
+"templateCategory.party" = "聚会";
+"templateCategory.transport" = "接送";
+"templateCategory.celebration" = "庆祝";
+"templateCategory.communication" = "沟通";
+"templateCategory.custom" = "自定义";
+
+// Templates
+"template.title" = "模板库";
+"template.builtIn" = "内置模板";
+"template.custom" = "我的模板";
+"template.favorites" = "收藏";
+"template.add" = "添加模板";
+"template.use" = "使用";
+"template.name" = "模板名称";
+"template.concertSupport" = "❤️ 我爱你 ❤️";
+"template.fanSupport" = "🌟 加油加油 🌟";
+"template.happyBirthday" = "🎂 生日快乐 🎂";
+"template.partyTime" = "🎉 Party Time 🎉";
+"template.airportPickup" = "✈️ 接机 ✈️";
+"template.driverService" = "🚗 代驾 🚗";
+"template.thankYou" = "🙏 谢谢 🙏";
+"template.pleaseWait" = "⏰ 请稍等 ⏰";
+
+// History
+"history.title" = "历史记录";
+"history.empty" = "暂无历史记录";
+"history.clearAll" = "清空全部";
+"history.confirmClear" = "确定清空所有历史记录？";
+"history.records" = "%d条";
+
+// Quick Access
+"quickAccess.history" = "历史记录";
+"quickAccess.templates" = "模板库";
+
+// Subscription
+"subscription.premium" = "高级版";
+"subscription.lifetime" = "终身解锁";
+"subscription.lifetimeDesc" = "一次购买，终身使用";
+"subscription.restore" = "恢复购买";
+"subscription.features" = "高级功能";
+
+// Premium Features
+"premium.unlimitedPreview" = "无限预览";
+"premium.advancedAnimations" = "高级动效";
+"premium.customFonts" = "自定义字体";
+"premium.backgroundImages" = "背景图片";
+"premium.exportFeatures" = "导出功能";
+"premium.prioritySupport" = "优先客服";
+
+// Quick Actions
+"quickAction.styleSettings" = "样式设置";
+"quickAction.selectTemplate" = "选择模板";
+
+// Info
+"info.developer" = "Thank_L Team";
+"info.version" = "版本";

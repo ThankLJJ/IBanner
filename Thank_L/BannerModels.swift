@@ -19,9 +19,36 @@ import AppKit
 enum BackgroundType: String, CaseIterable, Codable {
     case color = "纯色背景"
     case image = "图片背景"
-    
+
     var displayName: String {
-        return self.rawValue
+        switch self {
+        case .color:
+            return L10n.StyleSettings.colorBackground
+        case .image:
+            return L10n.StyleSettings.imageBackground
+        }
+    }
+}
+
+// MARK: - 滚动方向枚举
+/// 滚动动画的方向
+enum ScrollDirection: String, CaseIterable, Codable {
+    case leftToRight = "从右向左"  // 文字从右向左移动（默认）
+    case rightToLeft = "从左向右"  // 文字从左向右移动
+    case topToBottom = "从下向上"  // 文字从下向上移动
+    case bottomToTop = "从上向下"  // 文字从上向下移动
+
+    var displayName: String {
+        switch self {
+        case .leftToRight:
+            return L10n.ScrollDirection.leftToRight
+        case .rightToLeft:
+            return L10n.ScrollDirection.rightToLeft
+        case .topToBottom:
+            return L10n.ScrollDirection.topToBottom
+        case .bottomToTop:
+            return L10n.ScrollDirection.bottomToTop
+        }
     }
 }
 
@@ -35,28 +62,63 @@ enum AnimationType: String, CaseIterable, Codable {
     case breathing = "呼吸灯"
     case typewriter = "逐字显示"
     case randomFlash = "随机闪现"
-    
+    case wave = "波浪"           // 新增：波浪效果
+    case bounce = "弹跳"         // 新增：弹跳效果
+    case particles = "粒子"       // 新增：粒子特效
+    case led = "LED像素"         // 新增：LED像素化效果
+
     var displayName: String {
-        return self.rawValue
+        switch self {
+        case .none:
+            return L10n.Animation.none
+        case .scroll:
+            return L10n.Animation.scroll
+        case .blink:
+            return L10n.Animation.blink
+        case .gradient:
+            return L10n.Animation.gradient
+        case .breathing:
+            return L10n.Animation.breathing
+        case .typewriter:
+            return L10n.Animation.typewriter
+        case .randomFlash:
+            return L10n.Animation.randomFlash
+        case .wave:
+            return L10n.Animation.wave
+        case .bounce:
+            return L10n.Animation.bounce
+        case .particles:
+            return L10n.Animation.particles
+        case .led:
+            return L10n.Animation.led
+        }
     }
-    
+
     /// 动效描述
     var description: String {
         switch self {
         case .none:
-            return "静态显示，无动画效果"
+            return L10n.Animation.noneDesc
         case .scroll:
-            return "文字从右向左滚动显示"
+            return L10n.Animation.scrollDesc
         case .blink:
-            return "文字闪烁效果，类似灯牌"
+            return L10n.Animation.blinkDesc
         case .gradient:
-            return "彩虹渐变背景效果"
+            return L10n.Animation.gradientDesc
         case .breathing:
-            return "呼吸灯效果，透明度变化"
+            return L10n.Animation.breathingDesc
         case .typewriter:
-            return "文字逐个字符显示，打字机效果"
+            return L10n.Animation.typewriterDesc
         case .randomFlash:
-            return "文字在屏幕随机位置闪现，炫酷效果"
+            return L10n.Animation.randomFlashDesc
+        case .wave:
+            return L10n.Animation.waveDesc
+        case .bounce:
+            return L10n.Animation.bounceDesc
+        case .particles:
+            return L10n.Animation.particlesDesc
+        case .led:
+            return L10n.Animation.ledDesc
         }
     }
 }
@@ -67,20 +129,27 @@ enum FontStyle: String, CaseIterable, Codable {
     case normal = "普通字体"
     case artistic = "艺术字"
     case neon = "霓虹字"
-    
+
     var displayName: String {
-        return self.rawValue
+        switch self {
+        case .normal:
+            return L10n.FontStyle.normal
+        case .artistic:
+            return L10n.FontStyle.artistic
+        case .neon:
+            return L10n.FontStyle.neon
+        }
     }
-    
+
     /// 字体样式描述
     var description: String {
         switch self {
         case .normal:
-            return "标准字体显示"
+            return L10n.FontStyle.normalDesc
         case .artistic:
-            return "艺术字体效果，带有装饰性边框"
+            return L10n.FontStyle.artisticDesc
         case .neon:
-            return "霓虹灯效果，发光字体"
+            return L10n.FontStyle.neonDesc
         }
     }
 }
@@ -90,42 +159,45 @@ enum FontStyle: String, CaseIterable, Codable {
 struct BannerStyle: Codable {
     /// 文字内容
     var text: String = ""
-    
+
     /// 字体大小
     var fontSize: CGFloat = 48.0
-    
+
     /// 文字颜色
     var textColor: Color = .white
-    
+
     /// 背景颜色
     var backgroundColor: Color = .black
-    
+
     /// 背景类型
     var backgroundType: BackgroundType = .color
-    
+
     /// 背景图片路径（相对于Documents目录）
     var backgroundImagePath: String? = nil
-    
+
     /// 背景图片透明度 (0.0-1.0)
     var backgroundImageOpacity: Double = 1.0
-    
+
     /// 动画类型
     var animationType: AnimationType = .none
-    
+
+    /// 滚动方向（仅滚动动画有效）
+    var scrollDirection: ScrollDirection = .leftToRight
+
     /// 动画速度 (1.0为正常速度)
     var animationSpeed: Double = 1.0
-    
+
     /// 是否粗体
     var isBold: Bool = false
-    
+
     /// 字体样式
     var fontStyle: FontStyle = .normal
-    
+
     /// 创建时间
     var createdAt: Date = Date()
-    
+
     /// 自定义初始化
-    init(text: String = "", fontSize: CGFloat = 48.0, textColor: Color = .white, backgroundColor: Color = .black, backgroundType: BackgroundType = .color, backgroundImagePath: String? = nil, backgroundImageOpacity: Double = 1.0, animationType: AnimationType = .none, animationSpeed: Double = 1.0, isBold: Bool = false, fontStyle: FontStyle = .normal) {
+    init(text: String = "", fontSize: CGFloat = 48.0, textColor: Color = .white, backgroundColor: Color = .black, backgroundType: BackgroundType = .color, backgroundImagePath: String? = nil, backgroundImageOpacity: Double = 1.0, animationType: AnimationType = .none, scrollDirection: ScrollDirection = .leftToRight, animationSpeed: Double = 1.0, isBold: Bool = false, fontStyle: FontStyle = .normal) {
         self.text = text
         self.fontSize = fontSize
         self.textColor = textColor
@@ -134,6 +206,7 @@ struct BannerStyle: Codable {
         self.backgroundImagePath = backgroundImagePath
         self.backgroundImageOpacity = backgroundImageOpacity
         self.animationType = animationType
+        self.scrollDirection = scrollDirection
         self.animationSpeed = animationSpeed
         self.isBold = isBold
         self.fontStyle = fontStyle
@@ -209,11 +282,26 @@ enum TemplateCategory: String, CaseIterable, Codable {
     case celebration = "庆祝"
     case communication = "沟通"
     case custom = "自定义"
-    
+
     var displayName: String {
-        return self.rawValue
+        switch self {
+        case .all:
+            return L10n.TemplateCategory.all
+        case .support:
+            return L10n.TemplateCategory.support
+        case .party:
+            return L10n.TemplateCategory.party
+        case .transport:
+            return L10n.TemplateCategory.transport
+        case .celebration:
+            return L10n.TemplateCategory.celebration
+        case .communication:
+            return L10n.TemplateCategory.communication
+        case .custom:
+            return L10n.TemplateCategory.custom
+        }
     }
-    
+
     var icon: String {
         switch self {
         case .all:
@@ -406,15 +494,15 @@ struct SubscriptionProduct: Codable, Identifiable {
 /// 订阅时长枚举
 enum SubscriptionDuration: String, CaseIterable, Codable {
     case lifetime = "终身解锁"
-    
+
     var displayName: String {
-        return self.rawValue
+        return L10n.Subscription.lifetime
     }
-    
+
     var description: String {
         switch self {
         case .lifetime:
-            return "一次购买，终身使用"
+            return L10n.Subscription.lifetimeDesc
         }
     }
 }
@@ -427,28 +515,41 @@ enum PremiumFeature: String, CaseIterable, Codable {
     case backgroundImages = "背景图片"
     case exportFeatures = "导出功能"
     case prioritySupport = "优先客服"
-    
+
     var displayName: String {
-        return self.rawValue
+        switch self {
+        case .unlimitedPreview:
+            return L10n.PremiumFeature.unlimitedPreview
+        case .advancedAnimations:
+            return L10n.PremiumFeature.advancedAnimations
+        case .customFonts:
+            return L10n.PremiumFeature.customFonts
+        case .backgroundImages:
+            return L10n.PremiumFeature.backgroundImages
+        case .exportFeatures:
+            return L10n.PremiumFeature.exportFeatures
+        case .prioritySupport:
+            return L10n.PremiumFeature.prioritySupport
+        }
     }
-    
+
     var description: String {
         switch self {
         case .unlimitedPreview:
-            return "无限制使用预览功能"
+            return L10n.PremiumFeature.unlimitedPreview
         case .advancedAnimations:
-            return "解锁所有高级动画效果"
+            return L10n.PremiumFeature.advancedAnimations
         case .customFonts:
-            return "使用艺术字和霓虹字等特殊字体"
+            return L10n.PremiumFeature.customFonts
         case .backgroundImages:
-            return "设置自定义背景图片"
+            return L10n.PremiumFeature.backgroundImages
         case .exportFeatures:
-            return "导出横幅为图片或视频"
+            return L10n.PremiumFeature.exportFeatures
         case .prioritySupport:
-            return "享受优先技术支持服务"
+            return L10n.PremiumFeature.prioritySupport
         }
     }
-    
+
     var icon: String {
         switch self {
         case .unlimitedPreview:

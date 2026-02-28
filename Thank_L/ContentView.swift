@@ -77,28 +77,28 @@ struct ContentView: View {
     @ViewBuilder
     private var sidebarContent: some View {
         List {
-            Section("快速操作") {
+            Section(L10n.QuickSettings.title) {
                 NavigationLink {
                     StyleSettingsView(bannerStyle: $bannerStyle)
                 } label: {
-                    Label("样式设置", systemImage: "paintbrush")
+                    Label(L10n.Navigation.styleSettings, systemImage: "paintbrush")
                 }
-                
+
                 NavigationLink {
                     TemplateView(bannerStyle: $bannerStyle)
                 } label: {
-                    Label("模板库", systemImage: "doc.text")
+                    Label(L10n.Navigation.templates, systemImage: "doc.text")
                 }
-                
+
                 NavigationLink {
                     HistoryView(bannerStyle: $bannerStyle)
                 } label: {
-                    Label("历史记录", systemImage: "clock")
+                    Label(L10n.Navigation.history, systemImage: "clock")
                         .badge(dataManager.historyList.count)
                 }
             }
             
-            Section("预览") {
+            Section(L10n.Content.preview) {
                 // 小型预览区域
                 VStack(spacing: 8) {
                     ZStack {
@@ -171,15 +171,15 @@ struct ContentView: View {
             if UIDevice.current.userInterfaceIdiom != .pad {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
-                        Button("样式设置", systemImage: "paintbrush") {
+                        Button(L10n.Navigation.styleSettings, systemImage: "paintbrush") {
                             showingStyleSettings = true
                         }
                         
-                        Button("模板库", systemImage: "doc.text") {
+                        Button(L10n.Navigation.templates, systemImage: "doc.text") {
                             showingTemplates = true
                         }
                         
-                        Button("历史记录", systemImage: "clock") {
+                        Button(L10n.Navigation.history, systemImage: "clock") {
                             showingHistory = true
                         }
                     } label: {
@@ -611,6 +611,14 @@ struct ContentView: View {
             return "keyboard"
         case .randomFlash:
             return "sparkles"
+        case .wave:
+            return "water.waves"
+        case .bounce:
+            return "arrow.up.backward"
+        case .particles:
+            return "sparkles"
+        case .led:
+            return "grid"
         }
     }
     
