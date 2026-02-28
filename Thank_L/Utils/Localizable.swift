@@ -220,12 +220,18 @@ enum L10n {
 
     // MARK: - Premium Features
     enum PremiumFeature {
+        static let premiumFeature = NSLocalizedString("premium.premiumFeature", value: "Premium Feature", comment: "Premium feature title")
         static let unlimitedPreview = NSLocalizedString("premium.unlimitedPreview", value: "Unlimited Preview", comment: "Unlimited preview feature")
+        static let unlimitedPreviewDesc = NSLocalizedString("premium.unlimitedPreviewDesc", value: "Enjoy unlimited fullscreen display time", comment: "Unlimited preview description")
         static let advancedAnimations = NSLocalizedString("premium.advancedAnimations", value: "Advanced Animations", comment: "Advanced animations feature")
         static let customFonts = NSLocalizedString("premium.customFonts", value: "Custom Fonts", comment: "Custom fonts feature")
         static let backgroundImages = NSLocalizedString("premium.backgroundImages", value: "Background Images", comment: "Background images feature")
+        static let backgroundImagesDesc = NSLocalizedString("premium.backgroundImagesDesc", value: "Use custom images as banner background", comment: "Background images description")
         static let exportFeatures = NSLocalizedString("premium.exportFeatures", value: "Export Features", comment: "Export features")
         static let prioritySupport = NSLocalizedString("premium.prioritySupport", value: "Priority Support", comment: "Priority support feature")
+        static let upgrade = NSLocalizedString("premium.upgrade", value: "Upgrade Now", comment: "Upgrade button")
+        static let later = NSLocalizedString("premium.later", value: "Maybe Later", comment: "Later button")
+        static let freeTrialLimit = NSLocalizedString("premium.freeTrialLimit", value: "Free users can display for 30 seconds", comment: "Free trial limit message")
     }
 
     // MARK: - Quick Actions

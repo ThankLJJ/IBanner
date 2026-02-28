@@ -19,6 +19,9 @@ import AppKit
 struct BannerDisplayView: View {
     // MARK: - 属性
     let bannerStyle: BannerStyle
+    var isSubscribed: Bool = false
+    var onTimeLimitReached: (() -> Void)? = nil
+
     @Environment(\.dismiss) private var dismiss
 
     // MARK: - 动画状态
@@ -27,6 +30,11 @@ struct BannerDisplayView: View {
     @State private var gradientOffset: CGFloat = 0
     @State private var breathingOpacity: Double = 1.0
     @State private var isAnimating: Bool = false
+
+    // MARK: - 时间限制状态
+    @State private var displayTimer: Timer?
+    @State private var remainingTime: TimeInterval = SubscriptionManager.freeDisplayLimit
+    @State private var showingTimeLimitAlert = false
 
     // 新动效状态变量
     @State private var typewriterText: String = ""
@@ -84,17 +92,37 @@ struct BannerDisplayView: View {
                 // 背景层
                 backgroundView
                     .ignoresSafeArea(.all)
-                
+
                 // 文字内容层
                 textContentView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                // 免费用户倒计时提示
+                if !isSubscribed {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Text("\(Int(remainingTime))s")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.black.opacity(0.5))
+                                .cornerRadius(16)
+                                .padding()
+                        }
+                    }
+                }
             }
             .onAppear {
                 screenSize = geometry.size
                 startAnimation()
+                startDisplayTimer()
             }
             .onDisappear {
                 stopAnimation()
+                stopDisplayTimer()
             }
             // 双击退出手势
             .onTapGesture(count: 2) {
@@ -734,6 +762,37 @@ struct BannerDisplayView: View {
                 particles[i] = createParticle()
             }
         }
+    }
+
+    // MARK: - 展示时间限制控制
+
+    /// 开始展示计时器（仅免费用户）
+    private func startDisplayTimer() {
+        // 订阅用户无时间限制
+        guard !isSubscribed else { return }
+
+        remainingTime = SubscriptionManager.freeDisplayLimit
+
+        displayTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            remainingTime -= 1
+
+            // 时间到了
+            if remainingTime <= 0 {
+                stopDisplayTimer()
+                dismiss()
+
+                // 通知父视图显示升级提示
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    onTimeLimitReached?()
+                }
+            }
+        }
+    }
+
+    /// 停止展示计时器
+    private func stopDisplayTimer() {
+        displayTimer?.invalidate()
+        displayTimer = nil
     }
 }
 

@@ -33,6 +33,7 @@ struct ContentView: View {
     @State private var showingTemplates = false
     @State private var showingHistory = false
     @State private var showingSubscription = false
+    @State private var showingPremiumUpgrade = false
     @FocusState private var isInputFocused: Bool
 
     // 预览动画
@@ -112,7 +113,14 @@ struct ContentView: View {
             }
         }
         .fullScreenCover(isPresented: $showingBanner) {
-            BannerDisplayView(bannerStyle: bannerStyle)
+            BannerDisplayView(
+                bannerStyle: bannerStyle,
+                isSubscribed: subscriptionManager.isSubscribed,
+                onTimeLimitReached: {
+                    // 免费用户30秒后显示升级提示
+                    showingPremiumUpgrade = true
+                }
+            )
         }
         .sheet(isPresented: $showingSettings) {
             StyleSettingsView(bannerStyle: $bannerStyle)
@@ -125,6 +133,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingSubscription) {
             SubscriptionView()
+        }
+        .sheet(isPresented: $showingPremiumUpgrade) {
+            PremiumUpgradeSheet.forUnlimitedDisplay {}
         }
         .onAppear {
             loadStyle()
@@ -399,17 +410,35 @@ struct ContentView: View {
 
     private func animChip(_ anim: AnimationType) -> some View {
         Button {
+            // 检查是否为高级动效
+            if anim.isPremium && !subscriptionManager.isSubscribed {
+                // 显示升级提示，不设置样式
+                showingPremiumUpgrade = true
+                return
+            }
+            // 只有免费功能或已订阅才设置样式
             bannerStyle.animationType = anim
         } label: {
             VStack(spacing: 6) {
-                Circle()
-                    .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.secondarySystemBackground))
-                    .frame(width: 36, height: 36)
-                    .overlay(
-                        Image(systemName: animIcon(anim))
-                            .font(.system(size: 14))
-                            .foregroundStyle(bannerStyle.animationType == anim ? .white : .secondary)
-                    )
+                ZStack(alignment: .topTrailing) {
+                    Circle()
+                        .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.secondarySystemBackground))
+                        .frame(width: 36, height: 36)
+                        .overlay(
+                            Image(systemName: animIcon(anim))
+                                .font(.system(size: 14))
+                                .foregroundStyle(bannerStyle.animationType == anim ? .white : .secondary)
+                        )
+
+                    // 高级标识
+                    if anim.isPremium {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.orange)
+                            .offset(x: 2, y: -2)
+                    }
+                }
+
                 Text(anim.displayName)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

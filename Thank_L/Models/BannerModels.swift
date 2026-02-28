@@ -121,6 +121,16 @@ enum AnimationType: String, CaseIterable, Codable {
             return L10n.Animation.ledDesc
         }
     }
+
+    /// 是否为高级动效（需要订阅）
+    var isPremium: Bool {
+        switch self {
+        case .none, .scroll, .blink, .breathing:
+            return false
+        case .gradient, .typewriter, .randomFlash, .wave, .bounce, .particles, .led:
+            return true
+        }
+    }
 }
 
 // MARK: - 字体样式枚举
@@ -151,6 +161,11 @@ enum FontStyle: String, CaseIterable, Codable {
         case .neon:
             return L10n.FontStyle.neonDesc
         }
+    }
+
+    /// 是否为高级字体（需要订阅）
+    var isPremium: Bool {
+        return self != .normal
     }
 }
 
@@ -514,7 +529,6 @@ enum PremiumFeature: String, CaseIterable, Codable {
     case customFonts = "自定义字体"
     case backgroundImages = "背景图片"
     case exportFeatures = "导出功能"
-    case prioritySupport = "优先客服"
 
     var displayName: String {
         switch self {
@@ -528,8 +542,6 @@ enum PremiumFeature: String, CaseIterable, Codable {
             return L10n.PremiumFeature.backgroundImages
         case .exportFeatures:
             return L10n.PremiumFeature.exportFeatures
-        case .prioritySupport:
-            return L10n.PremiumFeature.prioritySupport
         }
     }
 
@@ -545,8 +557,6 @@ enum PremiumFeature: String, CaseIterable, Codable {
             return L10n.PremiumFeature.backgroundImages
         case .exportFeatures:
             return L10n.PremiumFeature.exportFeatures
-        case .prioritySupport:
-            return L10n.PremiumFeature.prioritySupport
         }
     }
 
@@ -562,8 +572,6 @@ enum PremiumFeature: String, CaseIterable, Codable {
             return "photo.fill"
         case .exportFeatures:
             return "square.and.arrow.up.fill"
-        case .prioritySupport:
-            return "headphones"
         }
     }
 }
@@ -572,15 +580,14 @@ enum PremiumFeature: String, CaseIterable, Codable {
 struct SubscriptionConfig {
     static let lifetimeProductID = "com.thankl.premium.lifetime"
     
-    static let lifetimePrice = "¥19.90"
-    
+    static let lifetimePrice = "¥1.00"
+
     static let premiumFeatures: [PremiumFeature] = [
         .unlimitedPreview,
         .advancedAnimations,
         .customFonts,
         .backgroundImages,
-        .exportFeatures,
-        .prioritySupport
+        .exportFeatures
     ]
     
     static func getSubscriptionProducts() -> [SubscriptionProduct] {

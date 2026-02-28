@@ -182,12 +182,18 @@
 "subscription.privacyPolicy" = "Privacy Policy";
 
 // Premium Features
+"premium.premiumFeature" = "Premium Feature";
 "premium.unlimitedPreview" = "Unlimited Preview";
+"premium.unlimitedPreviewDesc" = "Enjoy unlimited fullscreen display time";
 "premium.advancedAnimations" = "Advanced Animations";
 "premium.customFonts" = "Custom Fonts";
 "premium.backgroundImages" = "Background Images";
+"premium.backgroundImagesDesc" = "Use custom images as banner background";
 "premium.exportFeatures" = "Export Features";
 "premium.prioritySupport" = "Priority Support";
+"premium.upgrade" = "Upgrade Now";
+"premium.later" = "Maybe Later";
+"premium.freeTrialLimit" = "Free users can display for 30 seconds";
 
 // Quick Actions
 "quickAction.styleSettings" = "Style Settings";

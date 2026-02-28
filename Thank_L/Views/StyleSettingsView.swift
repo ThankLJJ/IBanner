@@ -43,12 +43,20 @@ struct StyleSettingsView: View {
     @Binding var bannerStyle: BannerStyle
     @Environment(\.dismiss) private var dismiss
 
+    // MARK: - 订阅管理
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+
     // MARK: - 状态属性
     @State private var showingColorPicker = false
     @State private var colorPickerType: ColorPickerType = .text
     @State private var tempColor: Color = .white
     @State private var showingImagePicker = false
     @State private var selectedImage: Image? = nil
+
+    // MARK: - 升级提示状态
+    @State private var showingPremiumUpgrade = false
+    @State private var premiumFeatureName = ""
+    @State private var premiumFeatureDescription: String? = nil
 
     // MARK: - 动画预览状态
     @State private var previewScrollOffset: CGFloat = 0
@@ -126,6 +134,13 @@ struct StyleSettingsView: View {
         }
         .sheet(isPresented: $showingImagePicker) {
             imagePickerSheet
+        }
+        .sheet(isPresented: $showingPremiumUpgrade) {
+            PremiumUpgradeSheet(
+                featureName: premiumFeatureName,
+                featureDescription: premiumFeatureDescription,
+                onDismiss: {}
+            )
         }
     }
     
@@ -526,6 +541,15 @@ struct StyleSettingsView: View {
 
                     // 图片预览区域 - 可直接点击选择
                     Button(action: {
+                        // 检查是否为高级功能
+                        if !subscriptionManager.isSubscribed {
+                            // 显示升级提示，不允许选择图片
+                            premiumFeatureName = L10n.StyleSettings.imageBackground
+                            premiumFeatureDescription = L10n.PremiumFeature.backgroundImagesDesc
+                            showingPremiumUpgrade = true
+                            return
+                        }
+                        // 只有订阅用户才能选择图片
                         showingImagePicker = true
                     }) {
                         ZStack {
@@ -541,6 +565,20 @@ struct StyleSettingsView: View {
                                                 .foregroundColor(Color.blue.opacity(0.3))
                                         )
                                 )
+
+                            // 高级标识
+                            if !subscriptionManager.isSubscribed {
+                                VStack {
+                                    HStack {
+                                        Spacer()
+                                        Image(systemName: "crown.fill")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.orange)
+                                            .padding(8)
+                                    }
+                                    Spacer()
+                                }
+                            }
 
                             if let imagePath = bannerStyle.backgroundImagePath,
                                let url = URL(string: "file://" + imagePath) {
@@ -773,12 +811,31 @@ struct StyleSettingsView: View {
     // MARK: - 辅助方法
     private func fontStyleButton(_ fontStyle: FontStyle) -> some View {
         Button(action: {
+            // 检查是否为高级字体
+            if fontStyle.isPremium && !subscriptionManager.isSubscribed {
+                // 显示升级提示，不设置样式
+                premiumFeatureName = fontStyle.displayName
+                premiumFeatureDescription = fontStyle.description
+                showingPremiumUpgrade = true
+                return
+            }
+            // 只有免费功能或已订阅才设置样式
             bannerStyle.fontStyle = fontStyle
         }) {
             VStack(spacing: 4) {
-                Text(fontStyle.displayName)
-                    .font(.caption)
-                    .fontWeight(.medium)
+                // 标题行（含高级标识）
+                HStack(spacing: 4) {
+                    Text(fontStyle.displayName)
+                        .font(.caption)
+                        .fontWeight(.medium)
+
+                    if fontStyle.isPremium {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(.orange)
+                    }
+                }
+
                 Text(fontStyle.description)
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -867,13 +924,31 @@ struct StyleSettingsView: View {
     /// 动画类型按钮
     private func animationTypeButton(_ animationType: AnimationType) -> some View {
         Button {
+            // 检查是否为高级动效
+            if animationType.isPremium && !subscriptionManager.isSubscribed {
+                // 显示升级提示，不设置样式
+                premiumFeatureName = animationType.displayName
+                premiumFeatureDescription = animationType.description
+                showingPremiumUpgrade = true
+                return
+            }
+            // 只有免费功能或已订阅才设置样式
             bannerStyle.animationType = animationType
         } label: {
             VStack(spacing: 8) {
-                Text(animationType.displayName)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
+                // 标题行（含高级标识）
+                HStack(spacing: 4) {
+                    Text(animationType.displayName)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    if animationType.isPremium {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.orange)
+                    }
+                }
+
                 Text(animationType.description)
                     .font(.caption)
                     .foregroundColor(.secondary)

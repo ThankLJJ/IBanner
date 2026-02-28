@@ -182,12 +182,18 @@
 "subscription.privacyPolicy" = "隐私政策";
 
 // Premium Features
+"premium.premiumFeature" = "高级功能";
 "premium.unlimitedPreview" = "无限预览";
+"premium.unlimitedPreviewDesc" = "享受无限制的全屏展示时长";
 "premium.advancedAnimations" = "高级动效";
 "premium.customFonts" = "自定义字体";
 "premium.backgroundImages" = "背景图片";
+"premium.backgroundImagesDesc" = "使用自定义图片作为横幅背景";
 "premium.exportFeatures" = "导出功能";
 "premium.prioritySupport" = "优先客服";
+"premium.upgrade" = "立即升级";
+"premium.later" = "以后再说";
+"premium.freeTrialLimit" = "免费用户可展示30秒";
 
 // Quick Actions
 "quickAction.styleSettings" = "样式设置";

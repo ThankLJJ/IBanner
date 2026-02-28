@@ -209,7 +209,7 @@ extension SubscriptionManager {
     func canUsePreviewFeature() -> Bool {
         return isSubscribed
     }
-    
+
     // 获取订阅状态描述
     func getSubscriptionStatusDescription() -> String {
         switch subscriptionStatus {
@@ -225,4 +225,35 @@ extension SubscriptionManager {
             return "状态未知"
         }
     }
+
+    // MARK: - 功能权限检查方法
+
+    /// 检查是否可以使用指定动效
+    /// - Parameter animationType: 动效类型
+    /// - Returns: 是否可用（订阅用户或免费动效返回true）
+    func canUse(animationType: AnimationType) -> Bool {
+        return isSubscribed || !animationType.isPremium
+    }
+
+    /// 检查是否可以使用指定字体样式
+    /// - Parameter fontStyle: 字体样式
+    /// - Returns: 是否可用（订阅用户或免费字体返回true）
+    func canUse(fontStyle: FontStyle) -> Bool {
+        return isSubscribed || !fontStyle.isPremium
+    }
+
+    /// 检查是否可以使用背景图片功能
+    /// - Returns: 是否可用（仅订阅用户可用）
+    func canUseBackgroundImage() -> Bool {
+        return isSubscribed
+    }
+
+    /// 检查是否有无限制的全屏展示时间
+    /// - Returns: 是否无限制（仅订阅用户无限制）
+    func hasUnlimitedDisplay() -> Bool {
+        return isSubscribed
+    }
+
+    /// 免费用户全屏展示的最大时长（秒）
+    static let freeDisplayLimit: TimeInterval = 30
 }
