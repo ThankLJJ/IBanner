@@ -60,7 +60,7 @@ struct BannerDisplayView: View {
 
     // 屏幕尺寸和设备信息
     @State private var screenSize: CGSize = .zero
-    
+
     // MARK: - 计算属性：设备适配
     private var isIPad: Bool {
         #if os(iOS)
@@ -69,7 +69,14 @@ struct BannerDisplayView: View {
         return false
         #endif
     }
-    
+
+    // 实际显示的文字（空时使用预览文字）
+    private var displayText: String {
+        bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? L10n.Content.previewText
+            : bannerStyle.text
+    }
+
     // 自适应字体大小
     private var adaptiveFontSize: CGFloat {
         let baseFontSize = bannerStyle.fontSize
@@ -80,7 +87,7 @@ struct BannerDisplayView: View {
             return baseFontSize
         }
     }
-    
+
     // 自适应边距
     private var adaptivePadding: CGFloat {
         return isIPad ? 40 : 20
@@ -234,7 +241,7 @@ struct BannerDisplayView: View {
     
     // MARK: - 静态文本视图
     private var staticTextView: some View {
-        Text(bannerStyle.text)
+        Text(displayText)
             .font(.system(
                 size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
@@ -255,7 +262,7 @@ struct BannerDisplayView: View {
                 // 水平滚动
                 HStack(spacing: 0) {
                     // 第一个文本
-                    Text(bannerStyle.text)
+                    Text(displayText)
                         .font(.system(
                             size: adaptiveFontSize,
                             weight: bannerStyle.isBold ? .bold : .regular
@@ -269,7 +276,7 @@ struct BannerDisplayView: View {
                         .frame(width: screenSize.width * 0.5)
 
                     // 第二个文本（用于无缝滚动）
-                    Text(bannerStyle.text)
+                    Text(displayText)
                         .font(.system(
                             size: adaptiveFontSize,
                             weight: bannerStyle.isBold ? .bold : .regular
@@ -289,7 +296,7 @@ struct BannerDisplayView: View {
                 // 垂直滚动
                 VStack(spacing: 0) {
                     // 第一个文本
-                    Text(bannerStyle.text)
+                    Text(displayText)
                         .font(.system(
                             size: adaptiveFontSize,
                             weight: bannerStyle.isBold ? .bold : .regular
@@ -303,7 +310,7 @@ struct BannerDisplayView: View {
                         .frame(height: screenSize.height * 0.5)
 
                     // 第二个文本（用于无缝滚动）
-                    Text(bannerStyle.text)
+                    Text(displayText)
                         .font(.system(
                             size: adaptiveFontSize,
                             weight: bannerStyle.isBold ? .bold : .regular
@@ -324,7 +331,7 @@ struct BannerDisplayView: View {
     
     // MARK: - 闪烁文本视图
     private var blinkingTextView: some View {
-        Text(bannerStyle.text)
+        Text(displayText)
             .font(.system(
                 size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
@@ -345,7 +352,7 @@ struct BannerDisplayView: View {
     
     // MARK: - 呼吸灯文本视图
     private var breathingTextView: some View {
-        Text(bannerStyle.text)
+        Text(displayText)
             .font(.system(
                 size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
@@ -388,7 +395,7 @@ struct BannerDisplayView: View {
         ZStack {
             ForEach(0..<randomFlashPositions.count, id: \.self) { index in
                 if index < randomFlashOpacities.count {
-                    Text(bannerStyle.text)
+                    Text(displayText)
                         .font(.system(
                             size: adaptiveFontSize * 0.8, // 稍微小一点避免重叠
                             weight: bannerStyle.isBold ? .bold : .regular
@@ -411,7 +418,7 @@ struct BannerDisplayView: View {
     private var waveTextView: some View {
         TimelineView(.animation(minimumInterval: 1/60)) { timeline in
             HStack(spacing: 0) {
-                ForEach(Array(bannerStyle.text.enumerated()), id: \.offset) { index, char in
+                ForEach(Array(displayText.enumerated()), id: \.offset) { index, char in
                     Text(String(char))
                         .font(.system(
                             size: adaptiveFontSize,
@@ -433,7 +440,7 @@ struct BannerDisplayView: View {
 
     // MARK: - 弹跳文本视图
     private var bounceTextView: some View {
-        Text(bannerStyle.text)
+        Text(displayText)
             .font(.system(
                 size: adaptiveFontSize,
                 weight: bannerStyle.isBold ? .bold : .regular
@@ -464,7 +471,7 @@ struct BannerDisplayView: View {
             }
 
             // 主文本
-            Text(bannerStyle.text)
+            Text(displayText)
                 .font(.system(
                     size: adaptiveFontSize,
                     weight: bannerStyle.isBold ? .bold : .regular
@@ -509,7 +516,7 @@ struct BannerDisplayView: View {
             }
 
             // LED风格的文字
-            Text(bannerStyle.text)
+            Text(displayText)
                 .font(.system(
                     size: adaptiveFontSize,
                     weight: bannerStyle.isBold ? .heavy : .bold,
@@ -567,9 +574,9 @@ struct BannerDisplayView: View {
         let interval = 0.1 / bannerStyle.animationSpeed // 根据动画速度调整间隔
 
         typewriterTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
-            if typewriterIndex < bannerStyle.text.count {
-                let index = bannerStyle.text.index(bannerStyle.text.startIndex, offsetBy: typewriterIndex)
-                typewriterText = String(bannerStyle.text[...index])
+            if typewriterIndex < displayText.count {
+                let index = displayText.index(displayText.startIndex, offsetBy: typewriterIndex)
+                typewriterText = String(displayText[...index])
                 typewriterIndex += 1
             } else {
                 // 完成后暂停一段时间，然后重新开始
@@ -640,7 +647,7 @@ struct BannerDisplayView: View {
                 weight: bannerStyle.isBold ? .bold : .regular
             )
             #endif
-            let textWidth = bannerStyle.text.widthOfString(usingFont: font)
+            let textWidth = displayText.widthOfString(usingFont: font)
             let textHeight = bannerStyle.fontSize
 
             // 根据滚动方向设置偏移
