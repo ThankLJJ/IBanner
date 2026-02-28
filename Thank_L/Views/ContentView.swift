@@ -13,7 +13,7 @@ import UIKit
 import AppKit
 #endif
 
-/// 主界面 - 极简现代设计
+/// 主界面 - 极简现代设计，集成所有设置功能
 struct ContentView: View {
     // MARK: - 状态
     @StateObject private var dataManager = BannerDataManager.shared
@@ -29,12 +29,30 @@ struct ContentView: View {
     )
 
     @State private var showingBanner = false
-    @State private var showingSettings = false
     @State private var showingTemplates = false
     @State private var showingHistory = false
     @State private var showingSubscription = false
     @State private var showingPremiumUpgrade = false
     @FocusState private var isInputFocused: Bool
+
+    // 颜色选择器状态
+    @State private var showingColorPicker = false
+    @State private var colorPickerType: ColorPickerType = .text
+    @State private var tempColor: Color = .white
+
+    // 图片选择器状态
+    @State private var showingImagePicker = false
+    @State private var selectedImage: Image? = nil
+    #if os(iOS)
+    @State private var selectedUIImage: UIImage?
+    @State private var imagePickerCoordinator: ImagePickerCoordinator?
+    #elseif os(macOS)
+    @State private var selectedNSImage: NSImage?
+    #endif
+
+    // 高级功能提示状态
+    @State private var premiumFeatureName = ""
+    @State private var premiumFeatureDescription: String? = nil
 
     // 预览动画
     @State private var animOffset: CGFloat = 0
@@ -50,6 +68,17 @@ struct ContentView: View {
     @State private var flashTimer: Timer?
     @State private var typewriterTimer: Timer?
 
+    // 预设颜色
+    private let presetColors: [Color] = [
+        .white, .black, .red, .orange, .yellow, .green,
+        .blue, .purple, .pink, .brown, .gray, .cyan
+    ]
+
+    // MARK: - 颜色选择器类型
+    enum ColorPickerType {
+        case text, background
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -57,27 +86,41 @@ struct ContentView: View {
                 Color(.systemBackground)
                     .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 32) {
-                        // 预览区
-                        previewArea
+                VStack(spacing: 0) {
+                    // 固定预览区
+                    previewArea
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
 
-                        // 输入区
-                        inputArea
+                    // 可滚动的设置区域
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // 输入区
+                            inputArea
 
-                        // 快捷操作
-                        quickActions
+                            // 文字设置
+                            textSettingsSection
 
-                        // 开始按钮
-                        startButton
+                            // 颜色设置
+                            colorSettingsSection
+
+                            // 动画设置
+                            animationSettingsSection
+
+                            // 背景设置
+                            backgroundSettingsSection
+
+                            // 预设样式
+                            presetStylesSection
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 40)
-                }
-                .scrollDismissesKeyboard(.interactively)
-                .onTapGesture {
-                    isInputFocused = false
+                    .scrollDismissesKeyboard(.interactively)
+                    .onTapGesture {
+                        isInputFocused = false
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -85,6 +128,25 @@ struct ContentView: View {
                 ToolbarItem(placement: .principal) {
                     Text(L10n.App.name)
                         .font(.system(size: 18, weight: .semibold))
+                }
+
+                // 开始展示按钮
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        #if os(iOS)
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        #endif
+                        // 只有输入了文字才保存到历史记录
+                        if !bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            dataManager.addHistory(bannerStyle)
+                        }
+                        saveStyle()
+                        showingBanner = true
+                    } label: {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.accentColor)
+                    }
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -103,8 +165,8 @@ struct ContentView: View {
                                 .foregroundStyle(.primary)
                         }
 
-                        Button { showingSettings = true } label: {
-                            Image(systemName: "slider.horizontal.3")
+                        Button { showingTemplates = true } label: {
+                            Image(systemName: "square.grid.2x2")
                                 .font(.system(size: 17))
                                 .foregroundStyle(.primary)
                         }
@@ -117,13 +179,9 @@ struct ContentView: View {
                 bannerStyle: bannerStyle,
                 isSubscribed: subscriptionManager.isSubscribed,
                 onTimeLimitReached: {
-                    // 免费用户30秒后显示升级提示
                     showingPremiumUpgrade = true
                 }
             )
-        }
-        .sheet(isPresented: $showingSettings) {
-            StyleSettingsView(bannerStyle: $bannerStyle)
         }
         .sheet(isPresented: $showingTemplates) {
             TemplateView(bannerStyle: $bannerStyle)
@@ -134,8 +192,18 @@ struct ContentView: View {
         .sheet(isPresented: $showingSubscription) {
             SubscriptionView()
         }
+        .sheet(isPresented: $showingColorPicker) {
+            colorPickerSheet
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            imagePickerSheet
+        }
         .sheet(isPresented: $showingPremiumUpgrade) {
-            PremiumUpgradeSheet.forUnlimitedDisplay {}
+            PremiumUpgradeSheet(
+                featureName: premiumFeatureName,
+                featureDescription: premiumFeatureDescription,
+                onDismiss: {}
+            )
         }
         .onAppear {
             loadStyle()
@@ -170,13 +238,12 @@ struct ContentView: View {
             // 文字
             animatedText
         }
-        .frame(height: 180)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
+        .frame(height: 160)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.15), radius: 15, y: 8)
         .onAppear { startAnimation() }
         .onChange(of: bannerStyle.animationType) { _, _ in restartAnimation() }
         .onChange(of: bannerStyle.animationSpeed) { _, _ in restartAnimation() }
-        .onTapGesture { showingSettings = true }
     }
 
     // MARK: - 渐变叠加
@@ -193,7 +260,7 @@ struct ContentView: View {
     // MARK: - 动画文字
     @ViewBuilder
     private var animatedText: some View {
-        let text = bannerStyle.text.isEmpty ? "输入文字开始" : bannerStyle.text
+        let text = bannerStyle.text.isEmpty ? L10n.Content.previewText : bannerStyle.text
 
         switch bannerStyle.animationType {
         case .scroll:
@@ -256,21 +323,18 @@ struct ContentView: View {
 
         case .particles:
             ZStack {
-                // 粒子层
                 ForEach(particles) { p in
                     Circle()
                         .fill(bannerStyle.textColor.opacity(p.opacity))
                         .frame(width: p.size, height: p.size)
                         .offset(x: p.x, y: p.y)
                 }
-                // 文字
                 textView(text)
             }
             .onAppear { startParticlesAnimation() }
 
         case .led:
             ZStack {
-                // LED 背景点阵
                 Canvas { context, size in
                     let dotSpacing: CGFloat = 8
                     let dotSize: CGFloat = 3
@@ -289,7 +353,6 @@ struct ContentView: View {
                     }
                 }
 
-                // LED 风格文字
                 textView(text)
                     .font(.system(size: min(bannerStyle.fontSize * 0.3, 22), weight: .heavy, design: .monospaced))
                     .shadow(color: bannerStyle.textColor, radius: 3, x: 0, y: 0)
@@ -323,7 +386,7 @@ struct ContentView: View {
 
     // MARK: - 输入区
     private var inputArea: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(L10n.Content.content)
                 .font(.subheadline)
                 .fontWeight(.medium)
@@ -352,88 +415,252 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - 快捷操作
-    private var quickActions: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // 颜色选择
-            Text(L10n.QuickSettings.color)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    colorChip(L10n.ColorTheme.classic, .white, .black)
-                    colorChip(L10n.ColorTheme.support, .white, .red)
-                    colorChip(L10n.ColorTheme.birthday, .white, .pink)
-                    colorChip(L10n.ColorTheme.pickup, .black, .white)
-                    colorChip(L10n.ColorTheme.driver, .white, .green)
-                    colorChip(L10n.ColorTheme.thanks, .white, .orange)
+    // MARK: - 文字设置区域
+    private var textSettingsSection: some View {
+        VStack(spacing: 16) {
+            // 字体大小
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(L10n.StyleSettings.fontSize)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Spacer()
+                    Text("\(Int(bannerStyle.fontSize))")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
+
+                Slider(value: $bannerStyle.fontSize, in: 20...100, step: 2)
             }
 
-            // 动画选择
-            Text(L10n.QuickSettings.animation)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
-                .padding(.top, 8)
+            Divider()
 
-            ScrollView(.horizontal, showsIndicators: false) {
+            // 粗体开关
+            HStack {
+                Text(L10n.StyleSettings.bold)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Spacer()
+                Toggle("", isOn: $bannerStyle.isBold)
+                    .labelsHidden()
+            }
+
+            Divider()
+
+            // 字体样式
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L10n.StyleSettings.fontStyle)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
                 HStack(spacing: 10) {
-                    ForEach(AnimationType.allCases, id: \.self) { anim in
-                        animChip(anim)
+                    ForEach(FontStyle.allCases, id: \.self) { style in
+                        fontStyleButton(style)
                     }
                 }
             }
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 
-    private func colorChip(_ name: String, _ fg: Color, _ bg: Color) -> some View {
+    private func fontStyleButton(_ style: FontStyle) -> some View {
         Button {
-            bannerStyle.textColor = fg
-            bannerStyle.backgroundColor = bg
-        } label: {
-            VStack(spacing: 6) {
-                Circle()
-                    .fill(bg)
-                    .frame(width: 36, height: 36)
-                    .overlay(Circle().stroke(.gray.opacity(0.2), lineWidth: 1))
-                    .overlay(Text("A").font(.caption.weight(.semibold)).foregroundStyle(fg))
-                Text(name)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+            if style.isPremium && !subscriptionManager.isSubscribed {
+                premiumFeatureName = style.displayName
+                premiumFeatureDescription = style.description
+                showingPremiumUpgrade = true
+                return
             }
+            bannerStyle.fontStyle = style
+        } label: {
+            VStack(spacing: 4) {
+                HStack(spacing: 2) {
+                    Text(style.displayName)
+                        .font(.caption)
+                        .fontWeight(.medium)
+
+                    if style.isPremium {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(bannerStyle.fontStyle == style ? Color.accentColor : Color(.tertiarySystemBackground))
+            )
+            .foregroundColor(bannerStyle.fontStyle == style ? .white : .primary)
         }
         .buttonStyle(.plain)
     }
 
+    // MARK: - 颜色设置区域
+    private var colorSettingsSection: some View {
+        VStack(spacing: 16) {
+            // 文字颜色
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.StyleSettings.textColor)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(presetColors, id: \.self) { color in
+                            colorButton(color: color, isSelected: bannerStyle.textColor == color) {
+                                bannerStyle.textColor = color
+                            }
+                        }
+                        customColorButton {
+                            colorPickerType = .text
+                            tempColor = bannerStyle.textColor
+                            showingColorPicker = true
+                        }
+                    }
+                }
+            }
+
+            Divider()
+
+            // 背景颜色
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.StyleSettings.backgroundColor)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(presetColors, id: \.self) { color in
+                            colorButton(color: color, isSelected: bannerStyle.backgroundColor == color) {
+                                bannerStyle.backgroundColor = color
+                            }
+                        }
+                        customColorButton {
+                            colorPickerType = .background
+                            tempColor = bannerStyle.backgroundColor
+                            showingColorPicker = true
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+
+    private func colorButton(color: Color, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(color)
+                .frame(width: 32, height: 32)
+                .overlay(
+                    Circle()
+                        .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                )
+                .overlay(
+                    color == .white ?
+                    Circle().stroke(Color.gray.opacity(0.4), lineWidth: 0.5) : nil
+                )
+        }
+    }
+
+    private func customColorButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [.red, .orange, .yellow, .green, .blue, .purple],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 32, height: 32)
+                .overlay(
+                    Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
+                .overlay(
+                    Image(systemName: "plus")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.white)
+                )
+        }
+    }
+
+    // MARK: - 动画设置区域
+    private var animationSettingsSection: some View {
+        VStack(spacing: 16) {
+            // 动画类型
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.StyleSettings.animationType)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(AnimationType.allCases, id: \.self) { anim in
+                            animChip(anim)
+                        }
+                    }
+                }
+            }
+
+            // 动画速度
+            if bannerStyle.animationType != .none {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(L10n.StyleSettings.animationSpeed)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Text(String(format: "%.1fx", bannerStyle.animationSpeed))
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Slider(value: $bannerStyle.animationSpeed, in: 0.5...3.0, step: 0.1)
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+
     private func animChip(_ anim: AnimationType) -> some View {
         Button {
-            // 检查是否为高级动效
             if anim.isPremium && !subscriptionManager.isSubscribed {
-                // 显示升级提示，不设置样式
                 showingPremiumUpgrade = true
                 return
             }
-            // 只有免费功能或已订阅才设置样式
             bannerStyle.animationType = anim
         } label: {
-            VStack(spacing: 6) {
+            VStack(spacing: 4) {
                 ZStack(alignment: .topTrailing) {
                     Circle()
-                        .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.secondarySystemBackground))
-                        .frame(width: 36, height: 36)
+                        .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.tertiarySystemBackground))
+                        .frame(width: 32, height: 32)
                         .overlay(
                             Image(systemName: animIcon(anim))
-                                .font(.system(size: 14))
+                                .font(.system(size: 13))
                                 .foregroundStyle(bannerStyle.animationType == anim ? .white : .secondary)
                         )
 
-                    // 高级标识
                     if anim.isPremium {
                         Image(systemName: "crown.fill")
-                            .font(.system(size: 8))
+                            .font(.system(size: 7))
                             .foregroundColor(.orange)
                             .offset(x: 2, y: -2)
                     }
@@ -464,6 +691,224 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - 背景设置区域
+    private var backgroundSettingsSection: some View {
+        VStack(spacing: 16) {
+            // 背景类型
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.StyleSettings.backgroundType)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                HStack(spacing: 10) {
+                    ForEach(BackgroundType.allCases, id: \.self) { type in
+                        backgroundTypeButton(type)
+                    }
+                }
+            }
+
+            // 图片背景设置
+            if bannerStyle.backgroundType == .image {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(L10n.StyleSettings.backgroundImage)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    Button {
+                        if !subscriptionManager.isSubscribed {
+                            premiumFeatureName = L10n.StyleSettings.imageBackground
+                            premiumFeatureDescription = L10n.PremiumFeature.backgroundImagesDesc
+                            showingPremiumUpgrade = true
+                            return
+                        }
+                        showingImagePicker = true
+                    } label: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.tertiarySystemBackground))
+                                .frame(height: 80)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .strokeBorder(Color.accentColor.opacity(0.5), lineWidth: 1, antialiased: true)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [6, 3]))
+                                                .foregroundColor(Color.accentColor.opacity(0.3))
+                                        )
+                                )
+
+                            if !subscriptionManager.isSubscribed {
+                                VStack {
+                                    HStack {
+                                        Spacer()
+                                        Image(systemName: "crown.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.orange)
+                                            .padding(6)
+                                    }
+                                    Spacer()
+                                }
+                            }
+
+                            if let imagePath = bannerStyle.backgroundImagePath,
+                               let url = URL(string: "file://" + imagePath) {
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(height: 80)
+                                            .clipped()
+                                            .cornerRadius(12)
+                                    default:
+                                        VStack {
+                                            Image(systemName: "photo")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(.accentColor)
+                                            Text(L10n.App.loading)
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                            } else {
+                                VStack(spacing: 6) {
+                                    Image(systemName: "photo.badge.plus")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.accentColor)
+                                    Text(L10n.StyleSettings.selectImage)
+                                        .font(.caption)
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    // 已选图片
+                    if let imagePath = bannerStyle.backgroundImagePath, !imagePath.isEmpty {
+                        HStack {
+                            Text(URL(fileURLWithPath: imagePath).lastPathComponent)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+
+                            Spacer()
+
+                            Button(L10n.App.remove) {
+                                BannerDataManager.shared.deleteBackgroundImage(at: imagePath)
+                                bannerStyle.backgroundImagePath = nil
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                        }
+                    }
+
+                    // 图片透明度
+                    if bannerStyle.backgroundImagePath != nil {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text(L10n.StyleSettings.imageOpacity)
+                                    .font(.caption)
+                                Spacer()
+                                Text("\(Int(bannerStyle.backgroundImageOpacity * 100))%")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Slider(value: $bannerStyle.backgroundImageOpacity, in: 0.1...1.0, step: 0.1)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+
+    private func backgroundTypeButton(_ type: BackgroundType) -> some View {
+        Button {
+            bannerStyle.backgroundType = type
+            if type == .color {
+                bannerStyle.backgroundImagePath = nil
+            }
+        } label: {
+            Text(type.displayName)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(bannerStyle.backgroundType == type ? .white : .primary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(bannerStyle.backgroundType == type ? Color.accentColor : Color(.tertiarySystemBackground))
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - 预设样式区域
+    private var presetStylesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.StyleSettings.presetStyles)
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    presetStyleChip(L10n.PresetStyle.concert, .red, .white, .blink)
+                    presetStyleChip(L10n.PresetStyle.birthday, .pink, .white, .gradient)
+                    presetStyleChip(L10n.PresetStyle.pickup, .white, .black, .none)
+                    presetStyleChip(L10n.PresetStyle.driver, .blue, .white, .breathing)
+                    presetStyleChip(L10n.PresetStyle.thanks, .green, .white, .none)
+                    presetStyleChip(L10n.PresetStyle.wait, .yellow, .black, .blink)
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+
+    private func presetStyleChip(_ name: String, _ bgColor: Color, _ textColor: Color, _ animation: AnimationType) -> some View {
+        Button {
+            bannerStyle.backgroundColor = bgColor
+            bannerStyle.textColor = textColor
+            bannerStyle.animationType = animation
+            bannerStyle.fontSize = 48
+            bannerStyle.isBold = true
+            bannerStyle.animationSpeed = 1.0
+        } label: {
+            VStack(spacing: 6) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(bgColor)
+                        .frame(width: 50, height: 32)
+
+                    Text(String(name.prefix(2)))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(textColor)
+                }
+
+                Text(name)
+                    .font(.caption2)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - 开始按钮
     private var startButton: some View {
         Button {
@@ -487,6 +932,141 @@ struct ContentView: View {
                 .cornerRadius(16)
         }
         .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+
+    // MARK: - 颜色选择器弹窗
+    private var colorPickerSheet: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                ColorPicker(
+                    L10n.StyleSettings.selectColor,
+                    selection: $tempColor,
+                    supportsOpacity: false
+                )
+                .labelsHidden()
+
+                Spacer()
+            }
+            .padding()
+            .navigationTitle(colorPickerType == .text ? L10n.StyleSettings.textSettingsTitle : L10n.StyleSettings.bgColorTitle)
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.App.cancel) {
+                        showingColorPicker = false
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L10n.App.confirm) {
+                        if colorPickerType == .text {
+                            bannerStyle.textColor = tempColor
+                        } else {
+                            bannerStyle.backgroundColor = tempColor
+                        }
+                        showingColorPicker = false
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
+    // MARK: - 图片选择器
+    private var imagePickerSheet: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                Text(L10n.StyleSettings.selectBackgroundImage)
+                    .font(.headline)
+
+                #if os(iOS)
+                Button(L10n.StyleSettings.selectFromAlbum) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        imagePickerCoordinator = ImagePickerCoordinator { image in
+                            selectedUIImage = image
+                            selectedImage = Image(uiImage: image)
+
+                            if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                                bannerStyle.backgroundImagePath = savedPath
+                            }
+
+                            showingImagePicker = false
+                        }
+
+                        let imagePicker = UIImagePickerController()
+                        imagePicker.sourceType = .photoLibrary
+                        imagePicker.delegate = imagePickerCoordinator
+
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = windowScene.windows.first {
+                            var topController = window.rootViewController
+                            while let presentedController = topController?.presentedViewController {
+                                topController = presentedController
+                            }
+                            topController?.present(imagePicker, animated: true)
+                        }
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                #elseif os(macOS)
+                Button(L10n.StyleSettings.selectFromFile) {
+                    let panel = NSOpenPanel()
+                    panel.allowedContentTypes = [.image]
+                    panel.allowsMultipleSelection = false
+
+                    if panel.runModal() == .OK,
+                       let url = panel.url,
+                       let image = NSImage(contentsOf: url) {
+                        selectedNSImage = image
+                        selectedImage = Image(nsImage: image)
+
+                        if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                            bannerStyle.backgroundImagePath = savedPath
+                        }
+
+                        showingImagePicker = false
+                    }
+                }
+                .padding()
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+                #endif
+
+                if selectedImage != nil {
+                    Button(L10n.StyleSettings.removeBackgroundImage) {
+                        selectedImage = nil
+                        #if os(iOS)
+                        selectedUIImage = nil
+                        #elseif os(macOS)
+                        selectedNSImage = nil
+                        #endif
+
+                        if let imagePath = bannerStyle.backgroundImagePath {
+                            BannerDataManager.shared.deleteBackgroundImage(at: imagePath)
+                        }
+                        bannerStyle.backgroundImagePath = nil
+                        showingImagePicker = false
+                    }
+                    .foregroundColor(.red)
+                }
+
+                Spacer()
+            }
+            .padding()
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.App.done) {
+                        showingImagePicker = false
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - 动画控制
@@ -535,9 +1115,8 @@ struct ContentView: View {
         typewriterTimer = nil
     }
 
-    // MARK: - 逐字显示动画
     private func startTypewriterAnimation() {
-        let text = bannerStyle.text.isEmpty ? "输入文字开始" : bannerStyle.text
+        let text = bannerStyle.text.isEmpty ? L10n.Content.previewText : bannerStyle.text
         typewriterText = ""
         typewriterIndex = 0
 
@@ -555,7 +1134,6 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - 随机闪现动画
     private func startRandomFlashAnimation() {
         flashOpacities = [1.0, 0.0, 0.0]
 
@@ -567,7 +1145,6 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - 粒子动画
     private func startParticlesAnimation() {
         particles = (0..<15).map { _ in
             ParticleData(
