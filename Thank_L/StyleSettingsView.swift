@@ -42,14 +42,23 @@ struct StyleSettingsView: View {
     // MARK: - 绑定属性
     @Binding var bannerStyle: BannerStyle
     @Environment(\.dismiss) private var dismiss
-    
+
     // MARK: - 状态属性
     @State private var showingColorPicker = false
     @State private var colorPickerType: ColorPickerType = .text
     @State private var tempColor: Color = .white
     @State private var showingImagePicker = false
     @State private var selectedImage: Image? = nil
-    
+
+    // MARK: - 动画预览状态
+    @State private var previewScrollOffset: CGFloat = 0
+    @State private var previewIsBlinking: Bool = false
+    @State private var previewBreathingOpacity: Double = 1.0
+    @State private var previewWavePhase: CGFloat = 0
+    @State private var previewBounceScale: CGFloat = 1.0
+    @State private var previewIsAnimating: Bool = false
+    @State private var previewGradientOffset: CGFloat = 0
+
     #if os(iOS)
     @State private var selectedUIImage: UIImage?
     @State private var imagePickerCoordinator: ImagePickerCoordinator?
@@ -129,6 +138,7 @@ struct StyleSettingsView: View {
 
             // 预览容器
             ZStack {
+                // 背景颜色层
                 RoundedRectangle(cornerRadius: 12)
                     .fill(bannerStyle.backgroundColor)
                     .frame(height: 120)
@@ -137,17 +147,222 @@ struct StyleSettingsView: View {
                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                     )
 
-                Text(bannerStyle.text.isEmpty ? L10n.Content.previewText : bannerStyle.text)
+                // 渐变动画背景
+                if bannerStyle.animationType == .gradient {
+                    LinearGradient(
+                        colors: [.red, .orange, .yellow, .green, .blue, .purple, .pink],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .opacity(0.8)
+                    .offset(x: previewGradientOffset)
+                    .animation(
+                        .linear(duration: 3.0 / bannerStyle.animationSpeed)
+                        .repeatForever(autoreverses: false),
+                        value: previewGradientOffset
+                    )
+                }
+
+                // 背景图片（如果设置了）
+                if bannerStyle.backgroundType == .image,
+                   let imagePath = bannerStyle.backgroundImagePath,
+                   let url = URL(string: "file://" + imagePath) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 120)
+                                .clipped()
+                                .opacity(bannerStyle.backgroundImageOpacity)
+                        default:
+                            Color.clear
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
+                // 动画文字层
+                previewAnimatedText
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .onAppear {
+                startPreviewAnimation()
+            }
+            .onDisappear {
+                stopPreviewAnimation()
+            }
+            .onChange(of: bannerStyle.animationType) { _, _ in
+                stopPreviewAnimation()
+                startPreviewAnimation()
+            }
+            .onChange(of: bannerStyle.animationSpeed) { _, _ in
+                stopPreviewAnimation()
+                startPreviewAnimation()
+            }
+        }
+    }
+
+    // MARK: - 预览动画文字
+    @ViewBuilder
+    private var previewAnimatedText: some View {
+        let previewText = bannerStyle.text.isEmpty ? L10n.Content.previewText : bannerStyle.text
+
+        switch bannerStyle.animationType {
+        case .scroll:
+            // 滚动效果预览
+            HStack(spacing: 0) {
+                Text(previewText)
                     .font(.system(
                         size: min(bannerStyle.fontSize * 0.4, 24),
                         weight: bannerStyle.isBold ? .bold : .regular
                     ))
                     .foregroundColor(bannerStyle.textColor)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .padding(.horizontal, 16)
+                    .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                    .fixedSize()
+
+                Spacer().frame(width: 60)
+
+                Text(previewText)
+                    .font(.system(
+                        size: min(bannerStyle.fontSize * 0.4, 24),
+                        weight: bannerStyle.isBold ? .bold : .regular
+                    ))
+                    .foregroundColor(bannerStyle.textColor)
+                    .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                    .fixedSize()
             }
+            .offset(x: previewScrollOffset)
+            .animation(
+                .linear(duration: 4.0 / bannerStyle.animationSpeed)
+                .repeatForever(autoreverses: false),
+                value: previewScrollOffset
+            )
+
+        case .blink:
+            // 闪烁效果预览
+            Text(previewText)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 16)
+                .opacity(previewIsBlinking ? 0.3 : 1.0)
+                .animation(
+                    .easeInOut(duration: 0.8 / bannerStyle.animationSpeed)
+                    .repeatForever(autoreverses: true),
+                    value: previewIsBlinking
+                )
+
+        case .breathing:
+            // 呼吸灯效果预览
+            Text(previewText)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 16)
+                .opacity(previewBreathingOpacity)
+                .scaleEffect(0.8 + previewBreathingOpacity * 0.2)
+                .animation(
+                    .easeInOut(duration: 2.0 / bannerStyle.animationSpeed)
+                    .repeatForever(autoreverses: true),
+                    value: previewBreathingOpacity
+                )
+
+        case .wave:
+            // 波浪效果预览
+            HStack(spacing: 0) {
+                ForEach(Array(previewText.enumerated()), id: \.offset) { index, char in
+                    Text(String(char))
+                        .font(.system(
+                            size: min(bannerStyle.fontSize * 0.4, 24),
+                            weight: bannerStyle.isBold ? .bold : .regular
+                        ))
+                        .foregroundColor(bannerStyle.textColor)
+                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                        .offset(y: sin(previewWavePhase + CGFloat(index) * 0.5) * 8)
+                }
+            }
+            .padding(.horizontal, 16)
+
+        case .bounce:
+            // 弹跳效果预览
+            Text(previewText)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 16)
+                .scaleEffect(previewBounceScale)
+                .offset(y: (previewBounceScale - 1.0) * -20)
+                .animation(
+                    .spring(response: 0.5, dampingFraction: 0.3, blendDuration: 0.5)
+                    .repeatForever(autoreverses: true),
+                    value: previewBounceScale
+                )
+
+        default:
+            // 静态显示（包括 none, typewriter, randomFlash, particles, led）
+            Text(previewText)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 16)
         }
+    }
+
+    // MARK: - 预览动画控制
+    private func startPreviewAnimation() {
+        guard !previewIsAnimating else { return }
+        previewIsAnimating = true
+
+        switch bannerStyle.animationType {
+        case .scroll:
+            previewScrollOffset = -100
+        case .blink:
+            previewIsBlinking = true
+        case .breathing:
+            previewBreathingOpacity = 0.5
+        case .gradient:
+            previewGradientOffset = -200
+        case .wave:
+            withAnimation(.linear(duration: 2.0 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
+                previewWavePhase = .pi * 2
+            }
+        case .bounce:
+            previewBounceScale = 1.1
+        default:
+            break
+        }
+    }
+
+    private func stopPreviewAnimation() {
+        previewIsAnimating = false
+        previewScrollOffset = 0
+        previewIsBlinking = false
+        previewBreathingOpacity = 1.0
+        previewWavePhase = 0
+        previewBounceScale = 1.0
+        previewGradientOffset = 0
     }
     
     // MARK: - 文字设置区域

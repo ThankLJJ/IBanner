@@ -1,216 +1,120 @@
 //
 //  ContentView.swift
-//  iBanner - 临时横幅工具
+//  iBanner
 //
 //  Created by L on 2024/7/12.
 //  Copyright © 2024 L. All rights reserved.
 //
 
 import SwiftUI
-// 免费版本：移除StoreKit导入
-// import StoreKit
 #if os(iOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
 #endif
 
-/// 主界面视图
-/// 提供横幅文字输入、样式设置、模板选择等核心功能
+/// 主界面 - 极简现代设计
 struct ContentView: View {
-    // MARK: - 状态管理
+    // MARK: - 状态
     @StateObject private var dataManager = BannerDataManager.shared
-    // 免费版本：移除订阅管理器
-    // @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var bannerStyle = BannerStyle(
         text: "",
         fontSize: 48,
         textColor: .white,
-        backgroundColor: .blue,
+        backgroundColor: .black,
         animationType: .scroll,
         animationSpeed: 1.0,
         isBold: true
     )
-    
-    // MARK: - 界面状态
+
     @State private var showingBanner = false
-    @State private var showingStyleSettings = false
+    @State private var showingSettings = false
     @State private var showingTemplates = false
     @State private var showingHistory = false
-    // 免费版本：移除订阅界面状态
-    // @State private var showingSubscription = false
-    @State private var isTextFieldFocused = false
-    
-    // 免费版本：移除预览次数限制
-    // @State private var previewCount = 0
-    // private let maxFreePreview = 0 // 免费用户无法预览，需要订阅
-    
-    // MARK: - 主视图
+    @State private var showingSubscription = false
+    @FocusState private var isInputFocused: Bool
+
+    // 预览动画
+    @State private var animOffset: CGFloat = 0
+    @State private var animPhase: CGFloat = 0
+    @State private var animOpacity: Double = 1.0
+    @State private var animScale: CGFloat = 1.0
+    @State private var typewriterText: String = ""
+    @State private var typewriterIndex: Int = 0
+    @State private var flashOpacities: [Double] = Array(repeating: 0, count: 3)
+    @State private var particles: [ParticleData] = []
+    @State private var ledPhase: CGFloat = 0
+    @State private var animationTimer: Timer?
+    @State private var flashTimer: Timer?
+    @State private var typewriterTimer: Timer?
+
     var body: some View {
-        // 使用NavigationSplitView为iPad提供更好的布局体验
-        #if os(iOS)
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            // iPad布局：使用NavigationSplitView
-            NavigationSplitView {
-                // 侧边栏：快速操作和设置
-                sidebarContent
-            } detail: {
-                // 主内容区域
-                mainContent
+        NavigationStack {
+            ZStack {
+                // 纯净背景
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 32) {
+                        // 预览区
+                        previewArea
+
+                        // 输入区
+                        inputArea
+
+                        // 快捷操作
+                        quickActions
+
+                        // 开始按钮
+                        startButton
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    .padding(.bottom, 40)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .onTapGesture {
+                    isInputFocused = false
+                }
             }
-            .navigationSplitViewStyle(.balanced)
-        } else {
-            // iPhone布局：使用NavigationView
-            NavigationView {
-                mainContent
-            }
-        }
-        #else
-        // macOS布局：使用NavigationView
-        NavigationView {
-            mainContent
-        }
-        #endif
-    }
-    
-    // MARK: - 侧边栏内容（iPad专用）
-    @ViewBuilder
-    private var sidebarContent: some View {
-        List {
-            Section(L10n.QuickSettings.title) {
-                NavigationLink {
-                    StyleSettingsView(bannerStyle: $bannerStyle)
-                } label: {
-                    Label(L10n.Navigation.styleSettings, systemImage: "paintbrush")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("iBanner")
+                        .font(.system(size: 18, weight: .semibold))
                 }
 
-                NavigationLink {
-                    TemplateView(bannerStyle: $bannerStyle)
-                } label: {
-                    Label(L10n.Navigation.templates, systemImage: "doc.text")
-                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 16) {
+                        if !subscriptionManager.isSubscribed {
+                            Button { showingSubscription = true } label: {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(.yellow)
+                            }
+                        }
 
-                NavigationLink {
-                    HistoryView(bannerStyle: $bannerStyle)
-                } label: {
-                    Label(L10n.Navigation.history, systemImage: "clock")
-                        .badge(dataManager.historyList.count)
-                }
-            }
-            
-            Section(L10n.Content.preview) {
-                // 小型预览区域
-                VStack(spacing: 8) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(bannerStyle.backgroundColor)
-                            .frame(height: 60)
-                        
-                        Text(bannerStyle.text.isEmpty ? "预览文字" : bannerStyle.text)
-                            .font(.system(
-                                size: 14,
-                                weight: bannerStyle.isBold ? .bold : .regular
-                            ))
-                            .foregroundColor(bannerStyle.textColor)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-                            .padding(.horizontal, 8)
-                    }
-                    
-                    Button("全屏展示") {
-                        showBanner()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                .padding(.vertical, 8)
-            }
-        }
-        .navigationTitle("iBanner")
-        .listStyle(.sidebar)
-    }
-    
-    // MARK: - 主内容区域
-    @ViewBuilder
-    private var mainContent: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // 输入区域
-                inputSection
-                
-                // 预览区域
-                previewSection
-                
-                // 快速设置区域
-                quickSettingsSection
-                
-                // 操作按钮区域
-                actionButtonsSection
-                
-                // 历史记录和模板快捷入口（仅在iPhone上显示）
-                #if os(iOS)
-                if UIDevice.current.userInterfaceIdiom != .pad {
-                    quickAccessSection
-                }
-                #else
-                quickAccessSection
-                #endif
-                
-                Spacer(minLength: 20)
-            }
-            .padding(.horizontal, adaptivePadding)
-            .padding(.vertical, 16)
-        }
-        .navigationTitle("iBanner")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(UIDevice.current.userInterfaceIdiom == .pad ? .inline : .large)
-        #endif
-        .toolbar {
-            // 仅在iPhone上显示工具栏菜单
-            #if os(iOS)
-            if UIDevice.current.userInterfaceIdiom != .pad {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button(L10n.Navigation.styleSettings, systemImage: "paintbrush") {
-                            showingStyleSettings = true
+                        Button { showingHistory = true } label: {
+                            Image(systemName: "clock")
+                                .font(.system(size: 17))
+                                .foregroundStyle(.primary)
                         }
-                        
-                        Button(L10n.Navigation.templates, systemImage: "doc.text") {
-                            showingTemplates = true
+
+                        Button { showingSettings = true } label: {
+                            Image(systemName: "slider.horizontal.3")
+                                .font(.system(size: 17))
+                                .foregroundStyle(.primary)
                         }
-                        
-                        Button(L10n.Navigation.history, systemImage: "clock") {
-                            showingHistory = true
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
-            #else
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button("样式设置", systemImage: "paintbrush") {
-                        showingStyleSettings = true
-                    }
-                    
-                    Button("模板库", systemImage: "doc.text") {
-                        showingTemplates = true
-                    }
-                    
-                    Button("历史记录", systemImage: "clock") {
-                        showingHistory = true
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-            #endif
         }
         .fullScreenCover(isPresented: $showingBanner) {
             BannerDisplayView(bannerStyle: bannerStyle)
         }
-        .sheet(isPresented: $showingStyleSettings) {
+        .sheet(isPresented: $showingSettings) {
             StyleSettingsView(bannerStyle: $bannerStyle)
         }
         .sheet(isPresented: $showingTemplates) {
@@ -219,464 +123,486 @@ struct ContentView: View {
         .sheet(isPresented: $showingHistory) {
             HistoryView(bannerStyle: $bannerStyle)
         }
-        // 免费版本：移除订阅界面
-        // .sheet(isPresented: $showingSubscription) {
-        //     SubscriptionView()
-        // }
-        .onAppear {
-            loadLastUsedStyle()
-            // 免费版本：移除订阅检查
-            // subscriptionManager.checkSubscriptionStatus()
+        .sheet(isPresented: $showingSubscription) {
+            SubscriptionView()
         }
-    }
-    
-    // MARK: - 计算属性：自适应边距
-    private var adaptivePadding: CGFloat {
-        #if os(iOS)
-        return UIDevice.current.userInterfaceIdiom == .pad ? 40 : 20
-        #else
-        return 20
-        #endif
+        .onAppear {
+            loadStyle()
+            Task { await subscriptionManager.checkSubscriptionStatus() }
+        }
     }
 
-    // MARK: - 输入区域
-    private var inputSection: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("横幅内容")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-                
-                // 字符计数
-                Text("\(bannerStyle.text.count)/100")
-                    .font(.caption)
-                    .foregroundColor(bannerStyle.text.count > 80 ? .orange : .secondary)
+    // MARK: - 预览区
+    private var previewArea: some View {
+        ZStack {
+            // 背景
+            bannerStyle.backgroundColor
+
+            // 渐变动画
+            if bannerStyle.animationType == .gradient {
+                gradientOverlay
             }
-            
-            // 文字输入框
-            ZStack(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: 12)
-                    #if os(iOS)
-                    .fill(Color(.systemGray6))
-                    #else
-                    .fill(Color.gray.opacity(0.1))
-                    #endif
-                    .frame(minHeight: 120)
-                
-                TextEditor(text: $bannerStyle.text)
-                    .font(.system(size: 18))
-                    .padding(12)
-                    .background(Color.clear)
-                    .scrollContentBackground(.hidden)
-                    .onTapGesture {
-                        isTextFieldFocused = true
+
+            // 背景图
+            if bannerStyle.backgroundType == .image,
+               let path = bannerStyle.backgroundImagePath,
+               let url = URL(string: "file://" + path) {
+                AsyncImage(url: url) { phase in
+                    if case .success(let img) = phase {
+                        img.resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .opacity(bannerStyle.backgroundImageOpacity)
                     }
-                
-                // 占位符
-                if bannerStyle.text.isEmpty {
-                    Text("输入要显示的文字...\n支持 Emoji 😊")
-                        .font(.system(size: 18))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 20)
-                        .allowsHitTesting(false)
                 }
             }
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isTextFieldFocused ? Color.blue : Color.clear, lineWidth: 2)
-            )
-            .onTapGesture {
-                isTextFieldFocused = true
-            }
+
+            // 文字
+            animatedText
         }
+        .frame(height: 180)
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
+        .onAppear { startAnimation() }
+        .onChange(of: bannerStyle.animationType) { _, _ in restartAnimation() }
+        .onChange(of: bannerStyle.animationSpeed) { _, _ in restartAnimation() }
+        .onTapGesture { showingSettings = true }
     }
-    
-    // MARK: - 预览区域
-    private var previewSection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Text("预览效果")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-                
-                // 当前样式信息
-                HStack(spacing: 8) {
-                    Circle()
-                        .fill(bannerStyle.textColor)
-                        .frame(width: 12, height: 12)
-                    
-                    Circle()
-                        .fill(bannerStyle.backgroundColor)
-                        .frame(width: 12, height: 12)
-                    
-                    Text(bannerStyle.animationType.displayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+
+    // MARK: - 渐变叠加
+    private var gradientOverlay: some View {
+        LinearGradient(
+            colors: [.red, .orange, .yellow, .green, .blue, .purple],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        .offset(x: animOffset)
+        .animation(.linear(duration: 3).repeatForever(autoreverses: false), value: animOffset)
+    }
+
+    // MARK: - 动画文字
+    @ViewBuilder
+    private var animatedText: some View {
+        let text = bannerStyle.text.isEmpty ? "输入文字开始" : bannerStyle.text
+
+        switch bannerStyle.animationType {
+        case .scroll:
+            HStack(spacing: 80) {
+                textView(text)
+                textView(text)
+            }
+            .offset(x: animOffset)
+            .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: animOffset)
+
+        case .blink:
+            textView(text)
+                .opacity(animOpacity)
+                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: animOpacity)
+
+        case .breathing:
+            textView(text)
+                .opacity(animOpacity)
+                .scaleEffect(animScale)
+                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: animOpacity)
+
+        case .wave:
+            HStack(spacing: 0) {
+                ForEach(Array(text.enumerated()), id: \.offset) { i, c in
+                    Text(String(c))
+                        .font(font())
+                        .foregroundStyle(bannerStyle.textColor)
+                        .offset(y: sin(animPhase + CGFloat(i) * 0.5) * 10)
                 }
             }
-            
-            // 预览容器
+            .onAppear {
+                withAnimation(.linear(duration: 2 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
+                    animPhase = .pi * 2
+                }
+            }
+
+        case .bounce:
+            textView(text)
+                .scaleEffect(animScale)
+                .animation(.spring(response: 0.4, dampingFraction: 0.4).repeatForever(autoreverses: true), value: animScale)
+
+        case .typewriter:
+            Text(typewriterText.isEmpty ? String(text.prefix(1)) : typewriterText)
+                .font(font())
+                .foregroundStyle(bannerStyle.textColor)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 24)
+                .onAppear { startTypewriterAnimation() }
+
+        case .randomFlash:
             ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(bannerStyle.backgroundColor)
-                    .frame(height: 100)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                
-                Text(bannerStyle.text.isEmpty ? "预览文字" : bannerStyle.text)
-                    .font(.system(
-                        size: min(bannerStyle.fontSize * 0.3, 20),
-                        weight: bannerStyle.isBold ? .bold : .regular
-                    ))
-                    .foregroundColor(bannerStyle.textColor)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .padding(.horizontal, 16)
-            }
-            .onTapGesture {
-                // 点击预览区域打开样式设置
-                showingStyleSettings = true
-            }
-        }
-    }
-    
-    // MARK: - 快速设置区域
-    private var quickSettingsSection: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("快速设置")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-            }
-            
-            // 快速颜色选择
-            VStack(alignment: .leading, spacing: 12) {
-                Text("颜色主题")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        quickColorTheme("经典", .white, .blue)
-                        quickColorTheme("应援", .white, .red)
-                        quickColorTheme("生日", .white, .pink)
-                        quickColorTheme("接机", .black, .white)
-                        quickColorTheme("代驾", .white, .green)
-                        quickColorTheme("谢谢", .white, .orange)
-                    }
-                    .padding(.horizontal, 4)
+                ForEach(0..<3, id: \.self) { i in
+                    textView(text)
+                        .opacity(flashOpacities[i])
+                        .scaleEffect(0.8 + flashOpacities[i] * 0.2)
                 }
             }
-            
-            // 快速动画选择
-            VStack(alignment: .leading, spacing: 12) {
-                Text("动画效果")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(AnimationType.allCases.prefix(4), id: \.self) { animation in
-                            quickAnimationButton(animation)
+            .onAppear { startRandomFlashAnimation() }
+
+        case .particles:
+            ZStack {
+                // 粒子层
+                ForEach(particles) { p in
+                    Circle()
+                        .fill(bannerStyle.textColor.opacity(p.opacity))
+                        .frame(width: p.size, height: p.size)
+                        .offset(x: p.x, y: p.y)
+                }
+                // 文字
+                textView(text)
+            }
+            .onAppear { startParticlesAnimation() }
+
+        case .led:
+            ZStack {
+                // LED 背景点阵
+                Canvas { context, size in
+                    let dotSpacing: CGFloat = 8
+                    let dotSize: CGFloat = 3
+                    let cols = Int(size.width / dotSpacing)
+                    let rows = Int(size.height / dotSpacing)
+
+                    for row in 0..<rows {
+                        for col in 0..<cols {
+                            let x = CGFloat(col) * dotSpacing
+                            let y = CGFloat(row) * dotSpacing
+                            let brightness = 0.1 + 0.15 * sin(ledPhase + CGFloat(row + col) * 0.15)
+                            var path = Path()
+                            path.addEllipse(in: CGRect(x: x, y: y, width: dotSize, height: dotSize))
+                            context.fill(path, with: .color(bannerStyle.textColor.opacity(brightness)))
                         }
                     }
-                    .padding(.horizontal, 4)
+                }
+
+                // LED 风格文字
+                textView(text)
+                    .font(.system(size: min(bannerStyle.fontSize * 0.3, 22), weight: .heavy, design: .monospaced))
+                    .shadow(color: bannerStyle.textColor, radius: 3, x: 0, y: 0)
+            }
+            .onAppear {
+                withAnimation(.linear(duration: 3 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
+                    ledPhase = .pi * 2
                 }
             }
+
+        default:
+            textView(text)
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                #if os(iOS)
-                .fill(Color(.systemGray6))
-                #else
-                .fill(Color.gray.opacity(0.1))
-                #endif
+    }
+
+    private func textView(_ text: String) -> some View {
+        Text(text)
+            .font(font())
+            .foregroundStyle(bannerStyle.textColor)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .padding(.horizontal, 24)
+    }
+
+    private func font() -> Font {
+        .system(
+            size: min(bannerStyle.fontSize * 0.3, 22),
+            weight: bannerStyle.isBold ? .bold : .regular
         )
     }
-    
-    // MARK: - 操作按钮区域
-    private var actionButtonsSection: some View {
-        VStack(spacing: 16) {
-            // 主要操作按钮
-            HStack(spacing: 16) {
-                // 样式设置按钮
-                Button {
-                    showingStyleSettings = true
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "paintbrush.pointed")
-                        Text("样式设置")
+
+    // MARK: - 输入区
+    private var inputArea: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("内容")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
+
+            TextEditor(text: $bannerStyle.text)
+                .font(.system(size: 17))
+                .frame(height: 100)
+                .padding(2)
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+                .focused($isInputFocused)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isInputFocused ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 2)
+                )
+                .overlay(alignment: .topLeading) {
+                    if bannerStyle.text.isEmpty {
+                        Text("输入要展示的文字...")
+                            .font(.system(size: 17))
+                            .foregroundStyle(.tertiary)
+                            .padding(16)
+                            .allowsHitTesting(false)
                     }
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.blue.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                            )
-                    )
                 }
-                
-                // 模板选择按钮
-                Button {
-                    showingTemplates = true
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "doc.text")
-                        Text("选择模板")
-                    }
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.purple)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.purple.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.purple.opacity(0.3), lineWidth: 1)
-                            )
-                    )
-                }
-            }
-            
-            // 展示按钮
-            Button {
-                showBanner()
-            } label: {
+        }
+    }
+
+    // MARK: - 快捷操作
+    private var quickActions: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // 颜色选择
+            Text("颜色")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 18, weight: .bold))
-                    Text(getShowButtonText())
-                        .font(.system(size: 18, weight: .bold))
+                    colorChip("经典", .white, .black)
+                    colorChip("应援", .white, .red)
+                    colorChip("生日", .white, .pink)
+                    colorChip("接机", .black, .white)
+                    colorChip("代驾", .white, .green)
+                    colorChip("谢谢", .white, .orange)
                 }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
             }
-            .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .opacity(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.6 : 1.0)
-        }
-    }
-    
-    // MARK: - 快捷入口区域
-    private var quickAccessSection: some View {
-        HStack(spacing: 16) {
-            // 历史记录
-            Button {
-                showingHistory = true
-            } label: {
-                VStack(spacing: 8) {
-                    Image(systemName: "clock.arrow.circlepath")
-                        .font(.system(size: 24))
-                        .foregroundColor(.orange)
-                    
-                    Text("历史记录")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                    
-                    Text("\(dataManager.historyList.count)条")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+
+            // 动画选择
+            Text("动画")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
+                .padding(.top, 8)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(AnimationType.allCases, id: \.self) { anim in
+                        animChip(anim)
+                    }
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 80)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        #if os(iOS)
-                        .fill(Color(.systemGray6))
-                        #else
-                        .fill(Color.gray.opacity(0.1))
-                        #endif
-                )
-            }
-            
-            // 模板库
-            Button {
-                showingTemplates = true
-            } label: {
-                VStack(spacing: 8) {
-                    Image(systemName: "folder.badge.plus")
-                        .font(.system(size: 24))
-                        .foregroundColor(.green)
-                    
-                    Text("模板库")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                    
-                    Text("\(BannerTemplate.builtInTemplates.count)个")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 80)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        #if os(iOS)
-                        .fill(Color(.systemGray6))
-                        #else
-                        .fill(Color.gray.opacity(0.1))
-                        #endif
-                )
             }
         }
     }
-    
-    // MARK: - 辅助方法
-    /// 快速颜色主题按钮
-    private func quickColorTheme(_ name: String, _ textColor: Color, _ bgColor: Color) -> some View {
+
+    private func colorChip(_ name: String, _ fg: Color, _ bg: Color) -> some View {
         Button {
-            bannerStyle.textColor = textColor
-            bannerStyle.backgroundColor = bgColor
+            bannerStyle.textColor = fg
+            bannerStyle.backgroundColor = bg
         } label: {
             VStack(spacing: 6) {
-                // 颜色预览
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(bgColor)
-                        .frame(width: 60, height: 32)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(bgColor == .white ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
-                        )
-                    
-                    Text("Aa")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(textColor)
-                }
-                
+                Circle()
+                    .fill(bg)
+                    .frame(width: 36, height: 36)
+                    .overlay(Circle().stroke(.gray.opacity(0.2), lineWidth: 1))
+                    .overlay(Text("A").font(.caption.weight(.semibold)).foregroundStyle(fg))
                 Text(name)
-                    .font(.caption)
-                    .foregroundColor(.primary)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
-    
-    /// 快速动画按钮
-    private func quickAnimationButton(_ animation: AnimationType) -> some View {
+
+    private func animChip(_ anim: AnimationType) -> some View {
         Button {
-            bannerStyle.animationType = animation
+            bannerStyle.animationType = anim
         } label: {
             VStack(spacing: 6) {
-                // 动画图标
-                Image(systemName: animationIcon(for: animation))
-                    .font(.system(size: 20))
-                    .foregroundColor(bannerStyle.animationType == animation ? .blue : .secondary)
-                    .frame(width: 40, height: 32)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(bannerStyle.animationType == animation ? Color.blue.opacity(0.1) : Color.clear)
+                Circle()
+                    .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.secondarySystemBackground))
+                    .frame(width: 36, height: 36)
+                    .overlay(
+                        Image(systemName: animIcon(anim))
+                            .font(.system(size: 14))
+                            .foregroundStyle(bannerStyle.animationType == anim ? .white : .secondary)
                     )
-                
-                Text(animation.displayName)
-                    .font(.caption)
-                    .foregroundColor(.primary)
+                Text(anim.displayName)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
-    
-    /// 获取动画类型对应的图标
-    private func animationIcon(for animation: AnimationType) -> String {
-        switch animation {
-        case .none:
-            return "minus"
+
+    private func animIcon(_ anim: AnimationType) -> String {
+        switch anim {
+        case .none: return "circle"
+        case .scroll: return "arrow.left.arrow.right"
+        case .blink: return "lightbulb"
+        case .gradient: return "paintpalette"
+        case .breathing: return "heart"
+        case .typewriter: return "keyboard"
+        case .randomFlash: return "sparkles"
+        case .wave: return "water.waves"
+        case .bounce: return "arrow.up"
+        case .particles: return "snowflake"
+        case .led: return "grid"
+        }
+    }
+
+    // MARK: - 开始按钮
+    private var startButton: some View {
+        Button {
+            #if os(iOS)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            #endif
+            dataManager.addHistory(bannerStyle)
+            saveStyle()
+            showingBanner = true
+        } label: {
+            Text("开始展示")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(
+                    bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        ? Color.gray
+                        : Color.accentColor
+                )
+                .cornerRadius(16)
+        }
+        .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+
+    // MARK: - 动画控制
+    private func startAnimation() {
+        stopAllTimers()
+
+        switch bannerStyle.animationType {
         case .scroll:
-            return "arrow.left.arrow.right"
+            withAnimation(.linear(duration: 5 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
+                animOffset = -200
+            }
         case .blink:
-            return "lightbulb"
-        case .gradient:
-            return "paintpalette"
+            withAnimation(.easeInOut(duration: 0.6 / bannerStyle.animationSpeed).repeatForever(autoreverses: true)) {
+                animOpacity = 0.3
+            }
         case .breathing:
-            return "heart.fill"
-        case .typewriter:
-            return "keyboard"
-        case .randomFlash:
-            return "sparkles"
-        case .wave:
-            return "water.waves"
+            withAnimation(.easeInOut(duration: 1.5 / bannerStyle.animationSpeed).repeatForever(autoreverses: true)) {
+                animOpacity = 0.5
+                animScale = 0.9
+            }
+        case .gradient:
+            withAnimation(.linear(duration: 3 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
+                animOffset = -300
+            }
         case .bounce:
-            return "arrow.up.backward"
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.4).repeatForever(autoreverses: true)) {
+                animScale = 1.1
+            }
+        case .typewriter:
+            startTypewriterAnimation()
+        case .randomFlash:
+            startRandomFlashAnimation()
         case .particles:
-            return "sparkles"
-        case .led:
-            return "grid"
+            startParticlesAnimation()
+        default:
+            break
         }
     }
-    
-    /// 显示横幅
-    private func showBanner() {
-        // 免费版本：直接显示横幅，无需付费检查
-        displayBanner()
+
+    private func stopAllTimers() {
+        animationTimer?.invalidate()
+        animationTimer = nil
+        flashTimer?.invalidate()
+        flashTimer = nil
+        typewriterTimer?.invalidate()
+        typewriterTimer = nil
     }
-    
-    /// 实际显示横幅的方法
-    private func displayBanner() {
-        // 保存到历史记录
-        dataManager.addHistory(bannerStyle)
-        
-        // 保存当前样式
-        saveCurrentStyle()
-        
-        // 显示横幅
-        showingBanner = true
+
+    // MARK: - 逐字显示动画
+    private func startTypewriterAnimation() {
+        let text = bannerStyle.text.isEmpty ? "输入文字开始" : bannerStyle.text
+        typewriterText = ""
+        typewriterIndex = 0
+
+        typewriterTimer = Timer.scheduledTimer(withTimeInterval: 0.1 / bannerStyle.animationSpeed, repeats: true) { _ in
+            if typewriterIndex < text.count {
+                let index = text.index(text.startIndex, offsetBy: typewriterIndex)
+                typewriterText = String(text[...index])
+                typewriterIndex += 1
+            } else {
+                typewriterTimer?.invalidate()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 / bannerStyle.animationSpeed) {
+                    startTypewriterAnimation()
+                }
+            }
+        }
     }
-    
-    /// 加载上次使用的样式
-    private func loadLastUsedStyle() {
-        if let styleData = UserDefaults.standard.data(forKey: "LastUsedStyle"),
-           let style = try? JSONDecoder().decode(BannerStyle.self, from: styleData) {
+
+    // MARK: - 随机闪现动画
+    private func startRandomFlashAnimation() {
+        flashOpacities = [1.0, 0.0, 0.0]
+
+        flashTimer = Timer.scheduledTimer(withTimeInterval: 0.4 / bannerStyle.animationSpeed, repeats: true) { _ in
+            let idx = Int.random(in: 0..<3)
+            for i in 0..<3 {
+                flashOpacities[i] = i == idx ? 1.0 : 0.0
+            }
+        }
+    }
+
+    // MARK: - 粒子动画
+    private func startParticlesAnimation() {
+        particles = (0..<15).map { _ in
+            ParticleData(
+                x: CGFloat.random(in: -80...80),
+                y: CGFloat.random(in: -40...40),
+                opacity: Double.random(in: 0.3...1.0),
+                size: CGFloat.random(in: 2...5)
+            )
+        }
+
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            for i in particles.indices {
+                particles[i].y -= CGFloat.random(in: 0.5...1.5)
+                particles[i].opacity -= 0.02
+
+                if particles[i].opacity <= 0 {
+                    particles[i] = ParticleData(
+                        x: CGFloat.random(in: -80...80),
+                        y: 40,
+                        opacity: 1.0,
+                        size: CGFloat.random(in: 2...5)
+                    )
+                }
+            }
+        }
+    }
+
+    private func restartAnimation() {
+        animOffset = 0
+        animPhase = 0
+        animOpacity = 1.0
+        animScale = 1.0
+        typewriterText = ""
+        typewriterIndex = 0
+        flashOpacities = [0, 0, 0]
+        particles = []
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { startAnimation() }
+    }
+
+    // MARK: - 数据
+    private func loadStyle() {
+        if let data = UserDefaults.standard.data(forKey: "LastUsedStyle"),
+           let style = try? JSONDecoder().decode(BannerStyle.self, from: data) {
             bannerStyle = style
-            bannerStyle.text = "" // 清空文字内容
+            bannerStyle.text = ""
         }
     }
-    
-    /// 保存当前样式
-    private func saveCurrentStyle() {
-        if let styleData = try? JSONEncoder().encode(bannerStyle) {
-            UserDefaults.standard.set(styleData, forKey: "LastUsedStyle")
+
+    private func saveStyle() {
+        if let data = try? JSONEncoder().encode(bannerStyle) {
+            UserDefaults.standard.set(data, forKey: "LastUsedStyle")
         }
-    }
-    
-    // 免费版本：移除预览次数相关方法
-    // /// 加载预览次数
-    // private func loadPreviewCount() {
-    //     previewCount = UserDefaults.standard.integer(forKey: "PreviewCount")
-    // }
-    // 
-    // /// 保存预览次数
-    // private func savePreviewCount() {
-    //     UserDefaults.standard.set(previewCount, forKey: "PreviewCount")
-    // }
-    
-    /// 获取展示按钮文本
-    private func getShowButtonText() -> String {
-        // 免费版本：统一显示"开始展示"
-        return "开始展示"
     }
 }
 
-// MARK: - 预览
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+// MARK: - 粒子数据
+struct ParticleData: Identifiable {
+    let id = UUID()
+    var x: CGFloat
+    var y: CGFloat
+    var opacity: Double
+    var size: CGFloat
+}
+
+#Preview {
+    ContentView()
 }
