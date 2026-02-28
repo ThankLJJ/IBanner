@@ -1,0 +1,191 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1772245710234,
+  "projectRoot": "/Users/l/Projects/Apple/Thank_L",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "Thank_L": {
+      "path": "Thank_L",
+      "purpose": null,
+      "fileCount": 14,
+      "lastAccessed": 1772245710229,
+      "keyFiles": [
+        "BannerDataManager.swift",
+        "BannerDisplayView.swift",
+        "BannerModels.swift",
+        "Configuration.storekit",
+        "ContentView.swift"
+      ]
+    },
+    "Thank_L.xcodeproj": {
+      "path": "Thank_L.xcodeproj",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1772245710232,
+      "keyFiles": [
+        "project.pbxproj"
+      ]
+    },
+    "Thank_LTests": {
+      "path": "Thank_LTests",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1772245710232,
+      "keyFiles": [
+        "Thank_LTests.swift"
+      ]
+    },
+    "Thank_LUITests": {
+      "path": "Thank_LUITests",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1772245710233,
+      "keyFiles": [
+        "Thank_LUITests.swift",
+        "Thank_LUITestsLaunchTests.swift"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "Thank_L/ContentView.swift",
+      "accessCount": 78,
+      "lastAccessed": 1772265125979,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/BannerDisplayView.swift",
+      "accessCount": 23,
+      "lastAccessed": 1772264679703,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/StyleSettingsView.swift",
+      "accessCount": 23,
+      "lastAccessed": 1772265335144,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L.xcodeproj/project.pbxproj",
+      "accessCount": 14,
+      "lastAccessed": 1772267076211,
+      "type": "directory"
+    },
+    {
+      "path": "",
+      "accessCount": 12,
+      "lastAccessed": 1772264652713,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Localizable.swift",
+      "accessCount": 12,
+      "lastAccessed": 1772264929104,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/SubscriptionView.swift",
+      "accessCount": 12,
+      "lastAccessed": 1772265454597,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/BannerModels.swift",
+      "accessCount": 11,
+      "lastAccessed": 1772264670034,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/zh-Hans.lproj/Localizable.strings",
+      "accessCount": 11,
+      "lastAccessed": 1772264993865,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/en.lproj/Localizable.strings",
+      "accessCount": 10,
+      "lastAccessed": 1772265059086,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/HistoryView.swift",
+      "accessCount": 9,
+      "lastAccessed": 1772265174107,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/TemplateView.swift",
+      "accessCount": 7,
+      "lastAccessed": 1772265469346,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L",
+      "accessCount": 4,
+      "lastAccessed": 1772264740896,
+      "type": "directory"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 2,
+      "lastAccessed": 1772264661371,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Thank_LApp.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772264669919,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/SubscriptionManager.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772264679074,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/BannerDataManager.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772264679116,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Info.plist",
+      "accessCount": 1,
+      "lastAccessed": 1772264670195,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Resources/Info.plist",
+      "accessCount": 1,
+      "lastAccessed": 1772267005399,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
