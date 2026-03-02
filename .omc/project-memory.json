@@ -96,6 +96,61 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "Thank_L/Views/ContentView.swift",
+      "accessCount": 43,
+      "lastAccessed": 1772430819336,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettingsView.swift",
+      "accessCount": 38,
+      "lastAccessed": 1772430819780,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/SubscriptionView.swift",
+      "accessCount": 14,
+      "lastAccessed": 1772416815330,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Models/BannerModels.swift",
+      "accessCount": 4,
+      "lastAccessed": 1772416870313,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Views/PremiumUpgradeSheet.swift",
+      "accessCount": 4,
+      "lastAccessed": 1772419392341,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplayView.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772419980176,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Resources/Configuration.storekit",
+      "accessCount": 2,
+      "lastAccessed": 1772420329717,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1772416847034,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Managers/SubscriptionManager.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772420329729,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }
