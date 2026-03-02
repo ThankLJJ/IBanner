@@ -502,7 +502,7 @@ struct ContentView: View {
                         .font(.caption)
                         .fontWeight(.medium)
 
-                    if style.isPremium {
+                    if style.isPremium && !subscriptionManager.isSubscribed {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 8))
                             .foregroundColor(.orange)
@@ -675,7 +675,7 @@ struct ContentView: View {
                                 .foregroundStyle(bannerStyle.animationType == anim ? .white : .secondary)
                         )
 
-                    if anim.isPremium {
+                    if anim.isPremium && !subscriptionManager.isSubscribed {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 6))
                             .foregroundColor(.orange)

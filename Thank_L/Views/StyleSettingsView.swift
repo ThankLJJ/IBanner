@@ -846,7 +846,7 @@ struct StyleSettingsView: View {
                         .font(.caption)
                         .fontWeight(.medium)
 
-                    if fontStyle.isPremium {
+                    if fontStyle.isPremium && !subscriptionManager.isSubscribed {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 9))
                             .foregroundColor(.orange)
@@ -994,7 +994,7 @@ struct StyleSettingsView: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
 
-                    if animationType.isPremium {
+                    if animationType.isPremium && !subscriptionManager.isSubscribed {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 10))
                             .foregroundColor(.orange)
