@@ -35,11 +35,6 @@ struct ContentView: View {
     @State private var showingPremiumUpgrade = false
     @FocusState private var isInputFocused: Bool
 
-    // 颜色选择器状态
-    @State private var showingColorPicker = false
-    @State private var colorPickerType: ColorPickerType = .text
-    @State private var tempColor: Color = .white
-
     // 图片选择器状态
     @State private var showingImagePicker = false
     @State private var selectedImage: Image? = nil
@@ -89,12 +84,12 @@ struct ContentView: View {
                 VStack(spacing: 0) {
                     // 固定预览区
                     previewArea
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
 
                     // 可滚动的设置区域
                     ScrollView {
-                        VStack(spacing: 24) {
+                        VStack(spacing: 16) {
                             // 输入区
                             inputArea
 
@@ -113,9 +108,9 @@ struct ContentView: View {
                             // 预设样式
                             presetStylesSection
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        .padding(.bottom, 40)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                        .padding(.bottom, 32)
                     }
                     .scrollDismissesKeyboard(.interactively)
                     .onTapGesture {
@@ -145,7 +140,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "play.fill")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(.accentColor)
+                            .foregroundColor(.accentColor)
                     }
                 }
 
@@ -192,9 +187,6 @@ struct ContentView: View {
         .sheet(isPresented: $showingSubscription) {
             SubscriptionView()
         }
-        .sheet(isPresented: $showingColorPicker) {
-            colorPickerSheet
-        }
         .sheet(isPresented: $showingImagePicker) {
             imagePickerSheet
         }
@@ -238,9 +230,9 @@ struct ContentView: View {
             // 文字
             animatedText
         }
-        .frame(height: 160)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.15), radius: 15, y: 8)
+        .frame(height: 120)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.12), radius: 10, y: 5)
         .onAppear { startAnimation() }
         .onChange(of: bannerStyle.animationType) { _, _ in restartAnimation() }
         .onChange(of: bannerStyle.animationSpeed) { _, _ in restartAnimation() }
@@ -386,18 +378,18 @@ struct ContentView: View {
 
     // MARK: - 输入区
     private var inputArea: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(L10n.Content.content)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
 
             TextEditor(text: $bannerStyle.text)
-                .font(.system(size: 17))
-                .frame(height: 100)
+                .font(.system(size: 16))
+                .frame(height: 80)
                 .padding(2)
                 .background(Color(.secondarySystemBackground))
-                .cornerRadius(12)
+                .cornerRadius(10)
                 .focused($isInputFocused)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -417,16 +409,16 @@ struct ContentView: View {
 
     // MARK: - 文字设置区域
     private var textSettingsSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // 字体大小
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text(L10n.StyleSettings.fontSize)
                         .font(.subheadline)
                         .fontWeight(.medium)
                     Spacer()
                     Text("\(Int(bannerStyle.fontSize))")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
@@ -448,21 +440,21 @@ struct ContentView: View {
             Divider()
 
             // 字体样式
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.fontStyle)
                     .font(.subheadline)
                     .fontWeight(.medium)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     ForEach(FontStyle.allCases, id: \.self) { style in
                         fontStyleButton(style)
                     }
                 }
             }
         }
-        .padding(16)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.secondarySystemBackground))
         )
     }
@@ -503,25 +495,21 @@ struct ContentView: View {
 
     // MARK: - 颜色设置区域
     private var colorSettingsSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // 文字颜色
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.textColor)
                     .font(.subheadline)
                     .fontWeight(.medium)
 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         ForEach(presetColors, id: \.self) { color in
                             colorButton(color: color, isSelected: bannerStyle.textColor == color) {
                                 bannerStyle.textColor = color
                             }
                         }
-                        customColorButton {
-                            colorPickerType = .text
-                            tempColor = bannerStyle.textColor
-                            showingColorPicker = true
-                        }
+                        customColorButton(for: .text)
                     }
                 }
             }
@@ -529,30 +517,26 @@ struct ContentView: View {
             Divider()
 
             // 背景颜色
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.backgroundColor)
                     .font(.subheadline)
                     .fontWeight(.medium)
 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         ForEach(presetColors, id: \.self) { color in
                             colorButton(color: color, isSelected: bannerStyle.backgroundColor == color) {
                                 bannerStyle.backgroundColor = color
                             }
                         }
-                        customColorButton {
-                            colorPickerType = .background
-                            tempColor = bannerStyle.backgroundColor
-                            showingColorPicker = true
-                        }
+                        customColorButton(for: .background)
                     }
                 }
             }
         }
-        .padding(16)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.secondarySystemBackground))
         )
     }
@@ -561,7 +545,7 @@ struct ContentView: View {
         Button(action: action) {
             Circle()
                 .fill(color)
-                .frame(width: 32, height: 32)
+                .frame(width: 28, height: 28)
                 .overlay(
                     Circle()
                         .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
@@ -573,8 +557,11 @@ struct ContentView: View {
         }
     }
 
-    private func customColorButton(action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    private func customColorButton(for type: ColorPickerType) -> some View {
+        Menu {
+            ColorPicker("", selection: type == .text ? $bannerStyle.textColor : $bannerStyle.backgroundColor, supportsOpacity: false)
+                .labelsHidden()
+        } label: {
             Circle()
                 .fill(
                     LinearGradient(
@@ -583,13 +570,13 @@ struct ContentView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .frame(width: 32, height: 32)
+                .frame(width: 28, height: 28)
                 .overlay(
                     Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1)
                 )
                 .overlay(
                     Image(systemName: "plus")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
                 )
         }
@@ -597,15 +584,15 @@ struct ContentView: View {
 
     // MARK: - 动画设置区域
     private var animationSettingsSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // 动画类型
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.animationType)
                     .font(.subheadline)
                     .fontWeight(.medium)
 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         ForEach(AnimationType.allCases, id: \.self) { anim in
                             animChip(anim)
                         }
@@ -617,14 +604,14 @@ struct ContentView: View {
             if bannerStyle.animationType != .none {
                 Divider()
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text(L10n.StyleSettings.animationSpeed)
                             .font(.subheadline)
                             .fontWeight(.medium)
                         Spacer()
                         Text(String(format: "%.1fx", bannerStyle.animationSpeed))
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundColor(.secondary)
                     }
 
@@ -632,9 +619,9 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(16)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.secondarySystemBackground))
         )
     }
@@ -647,27 +634,27 @@ struct ContentView: View {
             }
             bannerStyle.animationType = anim
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: 3) {
                 ZStack(alignment: .topTrailing) {
                     Circle()
                         .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.tertiarySystemBackground))
-                        .frame(width: 32, height: 32)
+                        .frame(width: 28, height: 28)
                         .overlay(
                             Image(systemName: animIcon(anim))
-                                .font(.system(size: 13))
+                                .font(.system(size: 11))
                                 .foregroundStyle(bannerStyle.animationType == anim ? .white : .secondary)
                         )
 
                     if anim.isPremium {
                         Image(systemName: "crown.fill")
-                            .font(.system(size: 7))
+                            .font(.system(size: 6))
                             .foregroundColor(.orange)
-                            .offset(x: 2, y: -2)
+                            .offset(x: 1, y: -1)
                     }
                 }
 
                 Text(anim.displayName)
-                    .font(.caption2)
+                    .font(.system(size: 9))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
@@ -693,14 +680,14 @@ struct ContentView: View {
 
     // MARK: - 背景设置区域
     private var backgroundSettingsSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // 背景类型
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.backgroundType)
                     .font(.subheadline)
                     .fontWeight(.medium)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     ForEach(BackgroundType.allCases, id: \.self) { type in
                         backgroundTypeButton(type)
                     }
@@ -711,7 +698,7 @@ struct ContentView: View {
             if bannerStyle.backgroundType == .image {
                 Divider()
 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(L10n.StyleSettings.backgroundImage)
                         .font(.subheadline)
                         .fontWeight(.medium)
@@ -726,15 +713,15 @@ struct ContentView: View {
                         showingImagePicker = true
                     } label: {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: 10)
                                 .fill(Color(.tertiarySystemBackground))
-                                .frame(height: 80)
+                                .frame(height: 60)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
+                                    RoundedRectangle(cornerRadius: 10)
                                         .strokeBorder(Color.accentColor.opacity(0.5), lineWidth: 1, antialiased: true)
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [6, 3]))
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 2]))
                                                 .foregroundColor(Color.accentColor.opacity(0.3))
                                         )
                                 )
@@ -744,9 +731,9 @@ struct ContentView: View {
                                     HStack {
                                         Spacer()
                                         Image(systemName: "crown.fill")
-                                            .font(.system(size: 10))
+                                            .font(.system(size: 8))
                                             .foregroundColor(.orange)
-                                            .padding(6)
+                                            .padding(4)
                                     }
                                     Spacer()
                                 }
@@ -760,13 +747,13 @@ struct ContentView: View {
                                         image
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
-                                            .frame(height: 80)
+                                            .frame(height: 60)
                                             .clipped()
-                                            .cornerRadius(12)
+                                            .cornerRadius(10)
                                     default:
-                                        VStack {
+                                        HStack(spacing: 6) {
                                             Image(systemName: "photo")
-                                                .font(.system(size: 20))
+                                                .font(.system(size: 16))
                                                 .foregroundColor(.accentColor)
                                             Text(L10n.App.loading)
                                                 .font(.caption2)
@@ -775,9 +762,9 @@ struct ContentView: View {
                                     }
                                 }
                             } else {
-                                VStack(spacing: 6) {
+                                HStack(spacing: 6) {
                                     Image(systemName: "photo.badge.plus")
-                                        .font(.system(size: 24))
+                                        .font(.system(size: 18))
                                         .foregroundColor(.accentColor)
                                     Text(L10n.StyleSettings.selectImage)
                                         .font(.caption)
@@ -792,7 +779,7 @@ struct ContentView: View {
                     if let imagePath = bannerStyle.backgroundImagePath, !imagePath.isEmpty {
                         HStack {
                             Text(URL(fileURLWithPath: imagePath).lastPathComponent)
-                                .font(.caption)
+                                .font(.caption2)
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
 
@@ -804,19 +791,19 @@ struct ContentView: View {
                             }
                             .buttonStyle(.plain)
                             .foregroundColor(.red)
-                            .font(.caption)
+                            .font(.caption2)
                         }
                     }
 
                     // 图片透明度
                     if bannerStyle.backgroundImagePath != nil {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Text(L10n.StyleSettings.imageOpacity)
-                                    .font(.caption)
+                                    .font(.caption2)
                                 Spacer()
                                 Text("\(Int(bannerStyle.backgroundImageOpacity * 100))%")
-                                    .font(.caption)
+                                    .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
 
@@ -826,9 +813,9 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(16)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.secondarySystemBackground))
         )
     }
@@ -841,13 +828,13 @@ struct ContentView: View {
             }
         } label: {
             Text(type.displayName)
-                .font(.subheadline)
+                .font(.caption)
                 .fontWeight(.medium)
                 .foregroundColor(bannerStyle.backgroundType == type ? .white : .primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 6)
                         .fill(bannerStyle.backgroundType == type ? Color.accentColor : Color(.tertiarySystemBackground))
                 )
         }
@@ -856,13 +843,13 @@ struct ContentView: View {
 
     // MARK: - 预设样式区域
     private var presetStylesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(L10n.StyleSettings.presetStyles)
                 .font(.subheadline)
                 .fontWeight(.medium)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     presetStyleChip(L10n.PresetStyle.concert, .red, .white, .blink)
                     presetStyleChip(L10n.PresetStyle.birthday, .pink, .white, .gradient)
                     presetStyleChip(L10n.PresetStyle.pickup, .white, .black, .none)
@@ -872,9 +859,9 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(16)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.secondarySystemBackground))
         )
     }
@@ -932,46 +919,6 @@ struct ContentView: View {
                 .cornerRadius(16)
         }
         .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-    }
-
-    // MARK: - 颜色选择器弹窗
-    private var colorPickerSheet: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                ColorPicker(
-                    L10n.StyleSettings.selectColor,
-                    selection: $tempColor,
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-
-                Spacer()
-            }
-            .padding()
-            .navigationTitle(colorPickerType == .text ? L10n.StyleSettings.textSettingsTitle : L10n.StyleSettings.bgColorTitle)
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.App.cancel) {
-                        showingColorPicker = false
-                    }
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.App.confirm) {
-                        if colorPickerType == .text {
-                            bannerStyle.textColor = tempColor
-                        } else {
-                            bannerStyle.backgroundColor = tempColor
-                        }
-                        showingColorPicker = false
-                    }
-                    .fontWeight(.semibold)
-                }
-            }
-        }
     }
 
     // MARK: - 图片选择器
