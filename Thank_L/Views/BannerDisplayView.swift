@@ -605,21 +605,28 @@ struct BannerDisplayView: View {
         // 启动定时器，随机闪现
         randomFlashTimer = Timer.scheduledTimer(withTimeInterval: 0.3 / bannerStyle.animationSpeed, repeats: true) { _ in
             let randomIndex = Int.random(in: 0..<flashCount)
-            
+
+            // 边界检查，防止动画停止后数组被清空导致越界
+            guard randomIndex < randomFlashOpacities.count else { return }
+
             // 闪现效果
             withAnimation(.easeInOut(duration: 0.5 / bannerStyle.animationSpeed)) {
-                randomFlashOpacities[randomIndex] = 1.0
+                if randomIndex < randomFlashOpacities.count {
+                    randomFlashOpacities[randomIndex] = 1.0
+                }
             }
-            
+
             // 淡出效果
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3 / bannerStyle.animationSpeed) {
                 withAnimation(.easeInOut(duration: 0.3 / bannerStyle.animationSpeed)) {
-                    randomFlashOpacities[randomIndex] = 0.0
+                    if randomIndex < randomFlashOpacities.count {
+                        randomFlashOpacities[randomIndex] = 0.0
+                    }
                 }
             }
-            
+
             // 随机更新位置
-            if Bool.random() {
+            if Bool.random() && randomIndex < randomFlashPositions.count {
                 let x = CGFloat.random(in: 50...(screenSize.width - 50))
                 let y = CGFloat.random(in: 100...(screenSize.height - 100))
                 randomFlashPositions[randomIndex] = CGPoint(x: x, y: y)

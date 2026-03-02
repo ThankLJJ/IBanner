@@ -35,6 +35,11 @@ struct ContentView: View {
     @State private var showingPremiumUpgrade = false
     @FocusState private var isInputFocused: Bool
 
+    // 颜色选择器状态
+    @State private var showingColorPicker = false
+    @State private var colorPickerType: ColorPickerType = .text
+    @State private var tempColor: Color = .white
+
     // 图片选择器状态
     @State private var showingImagePicker = false
     @State private var selectedImage: Image? = nil
@@ -78,7 +83,7 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 // 纯净背景
-                Color(.systemBackground)
+                Color.platformBackground
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
@@ -118,7 +123,9 @@ struct ContentView: View {
                     }
                 }
             }
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text(L10n.App.name)
@@ -126,7 +133,7 @@ struct ContentView: View {
                 }
 
                 // 开始展示按钮
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button {
                         #if os(iOS)
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -144,7 +151,7 @@ struct ContentView: View {
                     }
                 }
 
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .primaryAction) {
                     HStack(spacing: 16) {
                         if !subscriptionManager.isSubscribed {
                             Button { showingSubscription = true } label: {
@@ -169,15 +176,32 @@ struct ContentView: View {
                 }
             }
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: $showingBanner) {
             BannerDisplayView(
                 bannerStyle: bannerStyle,
                 isSubscribed: subscriptionManager.isSubscribed,
                 onTimeLimitReached: {
+                    premiumFeatureName = L10n.PremiumFeature.unlimitedPreview
+                    premiumFeatureDescription = L10n.PremiumFeature.unlimitedPreviewDesc
                     showingPremiumUpgrade = true
                 }
             )
         }
+        #else
+        .sheet(isPresented: $showingBanner) {
+            BannerDisplayView(
+                bannerStyle: bannerStyle,
+                isSubscribed: subscriptionManager.isSubscribed,
+                onTimeLimitReached: {
+                    premiumFeatureName = L10n.PremiumFeature.unlimitedPreview
+                    premiumFeatureDescription = L10n.PremiumFeature.unlimitedPreviewDesc
+                    showingPremiumUpgrade = true
+                }
+            )
+            .frame(minWidth: 800, minHeight: 600)
+        }
+        #endif
         .sheet(isPresented: $showingTemplates) {
             TemplateView(bannerStyle: $bannerStyle)
         }
@@ -196,6 +220,9 @@ struct ContentView: View {
                 featureDescription: premiumFeatureDescription,
                 onDismiss: {}
             )
+        }
+        .sheet(isPresented: $showingColorPicker) {
+            colorPickerSheet
         }
         .onAppear {
             loadStyle()
@@ -388,7 +415,7 @@ struct ContentView: View {
                 .font(.system(size: 16))
                 .frame(height: 80)
                 .padding(2)
-                .background(Color(.secondarySystemBackground))
+                .background(Color.platformSecondaryBackground)
                 .cornerRadius(10)
                 .focused($isInputFocused)
                 .overlay(
@@ -455,7 +482,7 @@ struct ContentView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color.platformSecondaryBackground)
         )
     }
 
@@ -486,7 +513,7 @@ struct ContentView: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(bannerStyle.fontStyle == style ? Color.accentColor : Color(.tertiarySystemBackground))
+                    .fill(bannerStyle.fontStyle == style ? Color.accentColor : Color.platformTertiaryBackground)
             )
             .foregroundColor(bannerStyle.fontStyle == style ? .white : .primary)
         }
@@ -537,7 +564,7 @@ struct ContentView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color.platformSecondaryBackground)
         )
     }
 
@@ -558,9 +585,10 @@ struct ContentView: View {
     }
 
     private func customColorButton(for type: ColorPickerType) -> some View {
-        Menu {
-            ColorPicker("", selection: type == .text ? $bannerStyle.textColor : $bannerStyle.backgroundColor, supportsOpacity: false)
-                .labelsHidden()
+        Button {
+            colorPickerType = type
+            tempColor = type == .text ? bannerStyle.textColor : bannerStyle.backgroundColor
+            showingColorPicker = true
         } label: {
             Circle()
                 .fill(
@@ -622,13 +650,15 @@ struct ContentView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color.platformSecondaryBackground)
         )
     }
 
     private func animChip(_ anim: AnimationType) -> some View {
         Button {
             if anim.isPremium && !subscriptionManager.isSubscribed {
+                premiumFeatureName = anim.displayName
+                premiumFeatureDescription = anim.description
                 showingPremiumUpgrade = true
                 return
             }
@@ -637,7 +667,7 @@ struct ContentView: View {
             VStack(spacing: 3) {
                 ZStack(alignment: .topTrailing) {
                     Circle()
-                        .fill(bannerStyle.animationType == anim ? Color.accentColor : Color(.tertiarySystemBackground))
+                        .fill(bannerStyle.animationType == anim ? Color.accentColor : Color.platformTertiaryBackground)
                         .frame(width: 28, height: 28)
                         .overlay(
                             Image(systemName: animIcon(anim))
@@ -681,134 +711,118 @@ struct ContentView: View {
     // MARK: - 背景设置区域
     private var backgroundSettingsSection: some View {
         VStack(spacing: 12) {
-            // 背景类型
+            // 背景图片上传区域
             VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.StyleSettings.backgroundType)
+                Text(L10n.StyleSettings.backgroundImage)
                     .font(.subheadline)
                     .fontWeight(.medium)
 
-                HStack(spacing: 8) {
-                    ForEach(BackgroundType.allCases, id: \.self) { type in
-                        backgroundTypeButton(type)
+                Button {
+                    if !subscriptionManager.isSubscribed {
+                        premiumFeatureName = L10n.StyleSettings.imageBackground
+                        premiumFeatureDescription = L10n.PremiumFeature.backgroundImagesDesc
+                        showingPremiumUpgrade = true
+                        return
+                    }
+                    showingImagePicker = true
+                } label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.platformTertiaryBackground)
+                            .frame(height: 60)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .strokeBorder(Color.accentColor.opacity(0.5), lineWidth: 1, antialiased: true)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 2]))
+                                            .foregroundColor(Color.accentColor.opacity(0.3))
+                                    )
+                            )
+
+                        if !subscriptionManager.isSubscribed {
+                            VStack {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 8))
+                                        .foregroundColor(.orange)
+                                        .padding(4)
+                                }
+                                Spacer()
+                            }
+                        }
+
+                        if let imagePath = bannerStyle.backgroundImagePath,
+                           let url = URL(string: "file://" + imagePath) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(height: 60)
+                                        .clipped()
+                                        .cornerRadius(10)
+                                default:
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "photo")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.accentColor)
+                                        Text(L10n.App.loading)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                        } else {
+                            HStack(spacing: 6) {
+                                Image(systemName: "photo.badge.plus")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.accentColor)
+                                Text(L10n.StyleSettings.selectImage)
+                                    .font(.caption)
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
                     }
                 }
-            }
+                .buttonStyle(.plain)
 
-            // 图片背景设置
-            if bannerStyle.backgroundType == .image {
-                Divider()
+                // 已选图片
+                if let imagePath = bannerStyle.backgroundImagePath, !imagePath.isEmpty {
+                    HStack {
+                        Text(URL(fileURLWithPath: imagePath).lastPathComponent)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(L10n.StyleSettings.backgroundImage)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                        Spacer()
 
-                    Button {
-                        if !subscriptionManager.isSubscribed {
-                            premiumFeatureName = L10n.StyleSettings.imageBackground
-                            premiumFeatureDescription = L10n.PremiumFeature.backgroundImagesDesc
-                            showingPremiumUpgrade = true
-                            return
+                        Button(L10n.App.remove) {
+                            BannerDataManager.shared.deleteBackgroundImage(at: imagePath)
+                            bannerStyle.backgroundImagePath = nil
+                            bannerStyle.backgroundType = .color
                         }
-                        showingImagePicker = true
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color(.tertiarySystemBackground))
-                                .frame(height: 60)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .strokeBorder(Color.accentColor.opacity(0.5), lineWidth: 1, antialiased: true)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 2]))
-                                                .foregroundColor(Color.accentColor.opacity(0.3))
-                                        )
-                                )
-
-                            if !subscriptionManager.isSubscribed {
-                                VStack {
-                                    HStack {
-                                        Spacer()
-                                        Image(systemName: "crown.fill")
-                                            .font(.system(size: 8))
-                                            .foregroundColor(.orange)
-                                            .padding(4)
-                                    }
-                                    Spacer()
-                                }
-                            }
-
-                            if let imagePath = bannerStyle.backgroundImagePath,
-                               let url = URL(string: "file://" + imagePath) {
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(height: 60)
-                                            .clipped()
-                                            .cornerRadius(10)
-                                    default:
-                                        HStack(spacing: 6) {
-                                            Image(systemName: "photo")
-                                                .font(.system(size: 16))
-                                                .foregroundColor(.accentColor)
-                                            Text(L10n.App.loading)
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                }
-                            } else {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "photo.badge.plus")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(.accentColor)
-                                    Text(L10n.StyleSettings.selectImage)
-                                        .font(.caption)
-                                        .foregroundColor(.accentColor)
-                                }
-                            }
-                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.red)
+                        .font(.caption2)
                     }
-                    .buttonStyle(.plain)
+                }
 
-                    // 已选图片
-                    if let imagePath = bannerStyle.backgroundImagePath, !imagePath.isEmpty {
+                // 图片透明度
+                if bannerStyle.backgroundImagePath != nil {
+                    VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text(URL(fileURLWithPath: imagePath).lastPathComponent)
+                            Text(L10n.StyleSettings.imageOpacity)
+                                .font(.caption2)
+                            Spacer()
+                            Text("\(Int(bannerStyle.backgroundImageOpacity * 100))%")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
-                                .lineLimit(1)
-
-                            Spacer()
-
-                            Button(L10n.App.remove) {
-                                BannerDataManager.shared.deleteBackgroundImage(at: imagePath)
-                                bannerStyle.backgroundImagePath = nil
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundColor(.red)
-                            .font(.caption2)
                         }
-                    }
 
-                    // 图片透明度
-                    if bannerStyle.backgroundImagePath != nil {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(L10n.StyleSettings.imageOpacity)
-                                    .font(.caption2)
-                                Spacer()
-                                Text("\(Int(bannerStyle.backgroundImageOpacity * 100))%")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-
-                            Slider(value: $bannerStyle.backgroundImageOpacity, in: 0.1...1.0, step: 0.1)
-                        }
+                        Slider(value: $bannerStyle.backgroundImageOpacity, in: 0.1...1.0, step: 0.1)
                     }
                 }
             }
@@ -816,7 +830,7 @@ struct ContentView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color.platformSecondaryBackground)
         )
     }
 
@@ -835,7 +849,7 @@ struct ContentView: View {
                 .padding(.vertical, 6)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(bannerStyle.backgroundType == type ? Color.accentColor : Color(.tertiarySystemBackground))
+                        .fill(bannerStyle.backgroundType == type ? Color.accentColor : Color.platformTertiaryBackground)
                 )
         }
         .buttonStyle(.plain)
@@ -862,7 +876,7 @@ struct ContentView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color.platformSecondaryBackground)
         )
     }
 
@@ -919,6 +933,53 @@ struct ContentView: View {
                 .cornerRadius(16)
         }
         .disabled(bannerStyle.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+
+    // MARK: - 颜色选择器
+    private var colorPickerSheet: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // 颜色预览
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(tempColor)
+                    .frame(width: 100, height: 100)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+
+                // 颜色选择器
+                ColorPicker("", selection: $tempColor, supportsOpacity: false)
+                    .labelsHidden()
+                    .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding()
+            .navigationTitle(colorPickerType == .text ? L10n.StyleSettings.textColor : L10n.StyleSettings.backgroundColor)
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.App.cancel) {
+                        showingColorPicker = false
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L10n.App.confirm) {
+                        if colorPickerType == .text {
+                            bannerStyle.textColor = tempColor
+                        } else {
+                            bannerStyle.backgroundColor = tempColor
+                        }
+                        showingColorPicker = false
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
     }
 
     // MARK: - 图片选择器

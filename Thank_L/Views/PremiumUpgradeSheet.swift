@@ -80,7 +80,11 @@ struct PremiumUpgradeSheet: View {
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemGray6))
+                        #if os(iOS)
+                        .fill(Color.platformSystemGray6)
+                        #else
+                        .fill(Color.gray.opacity(0.1))
+                        #endif
                 )
                 .padding(.horizontal, 24)
 

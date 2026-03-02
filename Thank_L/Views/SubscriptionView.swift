@@ -46,9 +46,11 @@ struct SubscriptionView: View {
                 .padding(.vertical, 16)
             }
             .navigationTitle(L10n.Subscription.premium)
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.App.close) {
                         dismiss()
                     }
@@ -120,7 +122,11 @@ struct SubscriptionView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemGray6))
+                #if os(iOS)
+                .fill(Color.platformSystemGray6)
+                #else
+                .fill(Color.gray.opacity(0.1))
+                #endif
         )
     }
     
@@ -147,7 +153,11 @@ struct SubscriptionView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                #if os(iOS)
+                .fill(Color.platformBackground)
+                #else
+                .fill(Color.platformBackground)
+                #endif
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -234,7 +244,11 @@ struct SubscriptionView: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
+                    #if os(iOS)
+                    .fill(Color.platformBackground)
+                    #else
+                    .fill(Color.platformBackground)
+                    #endif
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(

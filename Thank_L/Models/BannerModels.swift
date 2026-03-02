@@ -268,6 +268,45 @@ extension Color: Codable {
     }
 }
 
+// MARK: - 跨平台系统颜色
+extension Color {
+    /// 跨平台系统背景颜色
+    static var platformBackground: Color {
+        #if os(iOS)
+        return Color(UIColor.systemBackground)
+        #else
+        return Color(NSColor.windowBackgroundColor)
+        #endif
+    }
+
+    /// 跨平台二级系统背景颜色
+    static var platformSecondaryBackground: Color {
+        #if os(iOS)
+        return Color(UIColor.secondarySystemBackground)
+        #else
+        return Color(NSColor.controlBackgroundColor)
+        #endif
+    }
+
+    /// 跨平台三级系统背景颜色
+    static var platformTertiaryBackground: Color {
+        #if os(iOS)
+        return Color(UIColor.tertiarySystemBackground)
+        #else
+        return Color(NSColor.controlBackgroundColor).opacity(0.5)
+        #endif
+    }
+
+    /// 跨平台系统灰色6
+    static var platformSystemGray6: Color {
+        #if os(iOS)
+        return Color(UIColor.systemGray6)
+        #else
+        return Color.gray.opacity(0.1)
+        #endif
+    }
+}
+
 // MARK: - 横幅模板
 /// 预设的横幅模板
 struct BannerTemplate: Codable, Identifiable {
