@@ -169,6 +169,213 @@ enum FontStyle: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - 艺术字风格枚举
+/// 预设的艺术字风格
+enum ArtisticStyle: String, CaseIterable, Codable {
+    case none = "普通"
+
+    // 材质类
+    case metallic = "金属"
+    case glass = "玻璃"
+    case wood = "木纹"
+    case stone = "石头"
+
+    // 氛围类
+    case fire = "火焰"
+    case ice = "冰霜"
+    case electric = "电流"
+    case smoke = "烟雾"
+
+    // 风格类
+    case retro = "复古海报"
+    case cyberpunk = "赛博朋克"
+    case cartoon = "卡通"
+    case handwritten = "手写"
+    case calligraphy = "书法"
+
+    // 自定义
+    case custom = "自定义"
+
+    var displayName: String {
+        return self.rawValue
+    }
+
+    /// 风格分类
+    enum Category: String, CaseIterable {
+        case material = "材质"
+        case atmosphere = "氛围"
+        case style = "风格"
+
+        var displayName: String { self.rawValue }
+    }
+
+    /// 获取风格所属分类
+    var category: Category? {
+        switch self {
+        case .none, .custom:
+            return nil
+        case .metallic, .glass, .wood, .stone:
+            return .material
+        case .fire, .ice, .electric, .smoke:
+            return .atmosphere
+        case .retro, .cyberpunk, .cartoon, .handwritten, .calligraphy:
+            return .style
+        }
+    }
+
+    /// 是否为高级风格（需要订阅）
+    var isPremium: Bool {
+        return self != .none
+    }
+}
+
+// MARK: - 艺术字自定义参数配置
+/// 艺术字的自定义参数配置
+struct ArtisticStyleConfig: Codable {
+    // === 基础层 ===
+    var strokeWidth: CGFloat = 0
+    var strokeColor: Color = .black
+    var letterSpacing: CGFloat = 0
+
+    // === 阴影 ===
+    var shadowOffsetX: CGFloat = 0
+    var shadowOffsetY: CGFloat = 0
+    var shadowBlur: CGFloat = 0
+    var shadowColor: Color = .black
+
+    // === 进阶层 - 渐变与光泽 ===
+    var gradientStartColor: Color = .white
+    var gradientEndColor: Color = .white
+    var gradientAngle: Double = 0
+    var glossAngle: Double = 45
+
+    // === 高阶层 - 特效 ===
+    var embossDepth: CGFloat = 0
+    var innerGlowRadius: CGFloat = 0
+    var outerGlowRadius: CGFloat = 0
+    var outerGlowColor: Color = .white
+
+    // === 高阶层 - 纹理与高级 ===
+    var noiseIntensity: CGFloat = 0
+    var reflectionOpacity: CGFloat = 0
+    var perspectiveAngle: Double = 0
+
+    /// 默认配置
+    static let `default` = ArtisticStyleConfig()
+}
+
+// MARK: - 滚动动效配置
+struct ScrollAnimationConfig: Codable {
+    var direction: ScrollDirection = .leftToRight
+    var startPosition: Double = 0
+    var pauseAtCenter: Bool = false
+
+    static let `default` = ScrollAnimationConfig()
+}
+
+// MARK: - 闪烁动效配置
+struct BlinkAnimationConfig: Codable {
+    var frequency: Double = 1.0
+    var minOpacity: Double = 0.3
+    var maxOpacity: Double = 1.0
+
+    static let `default` = BlinkAnimationConfig()
+}
+
+// MARK: - 呼吸灯动效配置
+struct BreathingAnimationConfig: Codable {
+    var minScale: Double = 0.8
+    var maxScale: Double = 1.2
+    var minOpacity: Double = 0.5
+
+    static let `default` = BreathingAnimationConfig()
+}
+
+// MARK: - 波浪动效配置
+enum WaveDirection: String, Codable {
+    case horizontal = "水平"
+    case vertical = "垂直"
+}
+
+struct WaveAnimationConfig: Codable {
+    var amplitude: Double = 15
+    var frequency: Double = 0.5
+    var waveDirection: WaveDirection = .horizontal
+
+    static let `default` = WaveAnimationConfig()
+}
+
+// MARK: - 粒子动效配置
+enum ParticleMovement: String, Codable {
+    case rise = "上升"
+    case fall = "下降"
+    case explode = "爆炸"
+    case spiral = "螺旋"
+}
+
+struct ParticlesAnimationConfig: Codable {
+    var particleCount: Int = 30
+    var particleSizeMin: CGFloat = 2
+    var particleSizeMax: CGFloat = 6
+    var particleColors: [Color] = [.white, .yellow]
+    var movementPattern: ParticleMovement = .rise
+
+    static let `default` = ParticlesAnimationConfig()
+}
+
+// MARK: - 弹跳动效配置
+struct BounceAnimationConfig: Codable {
+    var bounceHeight: Double = 20
+    var elasticity: Double = 0.3
+    var squashAmount: Double = 0.2
+
+    static let `default` = BounceAnimationConfig()
+}
+
+// MARK: - 渐变动效配置
+enum GradientBlendMode: String, Codable {
+    case normal = "正常"
+    case overlay = "叠加"
+    case multiply = "正片叠底"
+}
+
+struct GradientAnimationConfig: Codable {
+    var gradientColors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple]
+    var cycleDuration: Double = 3.0
+    var blendMode: GradientBlendMode = .normal
+
+    static let `default` = GradientAnimationConfig()
+}
+
+// MARK: - 逐字显示动效配置
+struct TypewriterAnimationConfig: Codable {
+    var charDelay: Double = 0.1
+    var pauseAfterComplete: Double = 2.0
+    var cursorEnabled: Bool = false
+
+    static let `default` = TypewriterAnimationConfig()
+}
+
+// MARK: - 随机闪现动效配置
+struct RandomFlashAnimationConfig: Codable {
+    var flashCount: Int = 5
+    var fadeInDuration: Double = 0.5
+    var fadeOutDuration: Double = 0.3
+    var randomPosition: Bool = true
+
+    static let `default` = RandomFlashAnimationConfig()
+}
+
+// MARK: - LED像素动效配置
+struct LedAnimationConfig: Codable {
+    var dotSpacing: CGFloat = 6
+    var dotSize: CGFloat = 3
+    var glowIntensity: Double = 0.5
+    var flickerEnabled: Bool = true
+
+    static let `default` = LedAnimationConfig()
+}
+
 // MARK: - 横幅样式配置
 /// 横幅的样式配置信息
 struct BannerStyle: Codable {
@@ -208,11 +415,30 @@ struct BannerStyle: Codable {
     /// 字体样式
     var fontStyle: FontStyle = .normal
 
+    // === 新增：艺术字配置 ===
+    /// 艺术字风格
+    var artisticStyle: ArtisticStyle = .none
+
+    /// 艺术字自定义参数
+    var artisticConfig: ArtisticStyleConfig = .default
+
+    // === 新增：动效专属配置 ===
+    var scrollConfig: ScrollAnimationConfig?
+    var blinkConfig: BlinkAnimationConfig?
+    var breathingConfig: BreathingAnimationConfig?
+    var waveConfig: WaveAnimationConfig?
+    var particlesConfig: ParticlesAnimationConfig?
+    var bounceConfig: BounceAnimationConfig?
+    var gradientConfig: GradientAnimationConfig?
+    var typewriterConfig: TypewriterAnimationConfig?
+    var randomFlashConfig: RandomFlashAnimationConfig?
+    var ledConfig: LedAnimationConfig?
+
     /// 创建时间
     var createdAt: Date = Date()
 
     /// 自定义初始化
-    init(text: String = "", fontSize: CGFloat = 48.0, textColor: Color = .white, backgroundColor: Color = .black, backgroundType: BackgroundType = .color, backgroundImagePath: String? = nil, backgroundImageOpacity: Double = 1.0, animationType: AnimationType = .none, scrollDirection: ScrollDirection = .leftToRight, animationSpeed: Double = 1.0, isBold: Bool = false, fontStyle: FontStyle = .normal) {
+    init(text: String = "", fontSize: CGFloat = 48.0, textColor: Color = .white, backgroundColor: Color = .black, backgroundType: BackgroundType = .color, backgroundImagePath: String? = nil, backgroundImageOpacity: Double = 1.0, animationType: AnimationType = .none, scrollDirection: ScrollDirection = .leftToRight, animationSpeed: Double = 1.0, isBold: Bool = false, fontStyle: FontStyle = .normal, artisticStyle: ArtisticStyle = .none, artisticConfig: ArtisticStyleConfig = .default) {
         self.text = text
         self.fontSize = fontSize
         self.textColor = textColor
@@ -225,6 +451,8 @@ struct BannerStyle: Codable {
         self.animationSpeed = animationSpeed
         self.isBold = isBold
         self.fontStyle = fontStyle
+        self.artisticStyle = artisticStyle
+        self.artisticConfig = artisticConfig
         self.createdAt = Date()
     }
 }

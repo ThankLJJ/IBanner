@@ -29,6 +29,7 @@ struct BannerDisplayView: View {
     @State private var isBlinking: Bool = false
     @State private var gradientOffset: CGFloat = 0
     @State private var breathingOpacity: Double = 1.0
+    @State private var isBreathingMin: Bool = false
     @State private var isAnimating: Bool = false
 
     // MARK: - 时间限制状态
@@ -91,6 +92,57 @@ struct BannerDisplayView: View {
     // 自适应边距
     private var adaptivePadding: CGFloat {
         return isIPad ? 40 : 20
+    }
+
+    // MARK: - 动效配置帮助属性
+    /// 获取滚动动效配置（使用自定义配置或默认值）
+    private var effectiveScrollConfig: ScrollAnimationConfig {
+        bannerStyle.scrollConfig ?? .default
+    }
+
+    /// 获取闪烁动效配置
+    private var effectiveBlinkConfig: BlinkAnimationConfig {
+        bannerStyle.blinkConfig ?? .default
+    }
+
+    /// 获取呼吸灯动效配置
+    private var effectiveBreathingConfig: BreathingAnimationConfig {
+        bannerStyle.breathingConfig ?? .default
+    }
+
+    /// 获取波浪动效配置
+    private var effectiveWaveConfig: WaveAnimationConfig {
+        bannerStyle.waveConfig ?? .default
+    }
+
+    /// 获取粒子动效配置
+    private var effectiveParticlesConfig: ParticlesAnimationConfig {
+        bannerStyle.particlesConfig ?? .default
+    }
+
+    /// 获取弹跳动效配置
+    private var effectiveBounceConfig: BounceAnimationConfig {
+        bannerStyle.bounceConfig ?? .default
+    }
+
+    /// 获取渐变动效配置
+    private var effectiveGradientConfig: GradientAnimationConfig {
+        bannerStyle.gradientConfig ?? .default
+    }
+
+    /// 获取逐字显示动效配置
+    private var effectiveTypewriterConfig: TypewriterAnimationConfig {
+        bannerStyle.typewriterConfig ?? .default
+    }
+
+    /// 获取随机闪现动效配置
+    private var effectiveRandomFlashConfig: RandomFlashAnimationConfig {
+        bannerStyle.randomFlashConfig ?? .default
+    }
+
+    /// 获取LED动效配置
+    private var effectiveLedConfig: LedAnimationConfig {
+        bannerStyle.ledConfig ?? .default
     }
 
     var body: some View {
@@ -342,9 +394,9 @@ struct BannerDisplayView: View {
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
             .padding(.horizontal, adaptivePadding)
-            .opacity(isBlinking ? 0.3 : 1.0)
+            .opacity(isBlinking ? effectiveBlinkConfig.minOpacity : effectiveBlinkConfig.maxOpacity)
             .animation(
-                .easeInOut(duration: 0.8 / bannerStyle.animationSpeed)
+                .easeInOut(duration: 1.0 / (effectiveBlinkConfig.frequency * bannerStyle.animationSpeed))
                 .repeatForever(autoreverses: true),
                 value: isBlinking
             )
@@ -363,12 +415,12 @@ struct BannerDisplayView: View {
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
             .padding(.horizontal, adaptivePadding)
-            .opacity(breathingOpacity)
-            .scaleEffect(breathingOpacity)
+            .opacity(isBreathingMin ? effectiveBreathingConfig.minOpacity : 1.0)
+            .scaleEffect(isBreathingMin ? effectiveBreathingConfig.minScale : effectiveBreathingConfig.maxScale)
             .animation(
                 .easeInOut(duration: 2.0 / bannerStyle.animationSpeed)
                 .repeatForever(autoreverses: true),
-                value: breathingOpacity
+                value: isBreathingMin
             )
     }
     
@@ -416,26 +468,24 @@ struct BannerDisplayView: View {
 
     // MARK: - 波浪文本视图
     private var waveTextView: some View {
-        TimelineView(.animation(minimumInterval: 1/60)) { timeline in
-            HStack(spacing: 0) {
-                ForEach(Array(displayText.enumerated()), id: \.offset) { index, char in
-                    Text(String(char))
-                        .font(.system(
-                            size: adaptiveFontSize,
-                            weight: bannerStyle.isBold ? .bold : .regular
-                        ))
-                        .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                        .offset(y: sin(wavePhase + CGFloat(index) * 0.5) * 15)
-                }
-            }
-            .onAppear {
-                withAnimation(.linear(duration: 2.0 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
-                    wavePhase = .pi * 2
-                }
+        HStack(spacing: 0) {
+            ForEach(Array(displayText.enumerated()), id: \.offset) { index, char in
+                Text(String(char))
+                    .font(.system(
+                        size: adaptiveFontSize,
+                        weight: bannerStyle.isBold ? .bold : .regular
+                    ))
+                    .foregroundColor(bannerStyle.textColor)
+                    .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                    .offset(y: sin(wavePhase + CGFloat(index) * 0.5) * 15)
             }
         }
         .padding(.horizontal, adaptivePadding)
+        .onAppear {
+            withAnimation(.linear(duration: 2.0 / bannerStyle.animationSpeed).repeatForever(autoreverses: false)) {
+                wavePhase = .pi * 2
+            }
+        }
     }
 
     // MARK: - 弹跳文本视图
@@ -494,8 +544,9 @@ struct BannerDisplayView: View {
         ZStack {
             // LED点阵背景
             Canvas { context, size in
-                let dotSpacing: CGFloat = isIPad ? 8 : 6
-                let dotSize: CGFloat = isIPad ? 4 : 3
+                let config = effectiveLedConfig
+                let dotSpacing = config.dotSpacing
+                let dotSize = config.dotSize
                 let cols = Int(size.width / dotSpacing)
                 let rows = Int(size.height / dotSpacing)
 
@@ -506,7 +557,8 @@ struct BannerDisplayView: View {
                         let rect = CGRect(x: x, y: y, width: dotSize, height: dotSize)
 
                         // 计算LED亮度（基于相位产生闪烁效果）
-                        let brightness = 0.1 + 0.1 * sin(wavePhase + CGFloat(row + col) * 0.1)
+                        let flicker = config.flickerEnabled ? sin(wavePhase + CGFloat(row + col) * 0.1) : 0
+                        let brightness = 0.1 + config.glowIntensity * 0.2 * flicker
                         context.fill(
                             Ellipse().path(in: rect),
                             with: .color(bannerStyle.textColor.opacity(brightness))
@@ -676,7 +728,7 @@ struct BannerDisplayView: View {
             gradientOffset = -screenSize.width
 
         case .breathing:
-            breathingOpacity = 0.5
+            isBreathingMin = false
 
         case .typewriter:
             startTypewriterAnimation()
@@ -727,21 +779,23 @@ struct BannerDisplayView: View {
 
     /// 开始弹跳动画
     private func startBounceAnimation() {
-        bounceScale = 0.8
-        bounceOffset = 20
+        let config = effectiveBounceConfig
+        bounceScale = 1.0 - config.squashAmount
+        bounceOffset = config.bounceHeight
 
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.3, blendDuration: 0.5).repeatForever(autoreverses: true)) {
-            bounceScale = 1.1
-            bounceOffset = -20
+        withAnimation(.spring(response: 0.5, dampingFraction: config.elasticity, blendDuration: 0.5).repeatForever(autoreverses: true)) {
+            bounceScale = 1.0 + config.squashAmount
+            bounceOffset = -config.bounceHeight
         }
     }
 
     /// 开始粒子动画
     private func startParticlesAnimation() {
         particles = []
+        let config = effectiveParticlesConfig
 
         // 创建初始粒子
-        for _ in 0..<30 {
+        for _ in 0..<config.particleCount {
             particles.append(createParticle())
         }
 
@@ -753,12 +807,12 @@ struct BannerDisplayView: View {
 
     /// 创建新粒子
     private func createParticle() -> Particle {
-        let colors: [Color] = [.white, .yellow, .orange, .pink, .cyan, .green]
+        let config = effectiveParticlesConfig
         return Particle(
             x: CGFloat.random(in: -screenSize.width/2...screenSize.width/2),
             y: screenSize.height / 2,
-            size: CGFloat.random(in: 2...6),
-            color: colors.randomElement() ?? .white,
+            size: CGFloat.random(in: config.particleSizeMin...config.particleSizeMax),
+            color: config.particleColors.randomElement() ?? .white,
             speed: CGFloat.random(in: 1...3),
             opacity: 1.0
         )
@@ -844,12 +898,12 @@ struct Particle: Identifiable {
 struct FontStyleModifier: ViewModifier {
     let fontStyle: FontStyle
     let textColor: Color
-    
+
     func body(content: Content) -> some View {
         switch fontStyle {
         case .normal:
             content
-            
+
         case .artistic:
             // 艺术字：渐变文字效果 + 立体阴影
             ZStack {
@@ -877,6 +931,390 @@ struct FontStyleModifier: ViewModifier {
                 .shadow(color: textColor.opacity(0.7), radius: 6, x: 0, y: 0)
                 .shadow(color: textColor.opacity(0.8), radius: 12, x: 0, y: 0)
                 .shadow(color: textColor, radius: 20, x: 0, y: 0)
+        }
+    }
+}
+
+// MARK: - 艺术字风格修饰符
+struct ArtisticStyleModifier: ViewModifier {
+    let artisticStyle: ArtisticStyle
+    let artisticConfig: ArtisticStyleConfig
+    let textColor: Color
+
+    func body(content: Content) -> some View {
+        switch artisticStyle {
+        case .none:
+            content
+
+        case .metallic:
+            metallicStyle(content)
+
+        case .glass:
+            glassStyle(content)
+
+        case .wood:
+            woodStyle(content)
+
+        case .stone:
+            stoneStyle(content)
+
+        case .fire:
+            fireStyle(content)
+
+        case .ice:
+            iceStyle(content)
+
+        case .electric:
+            electricStyle(content)
+
+        case .smoke:
+            smokeStyle(content)
+
+        case .retro:
+            retroStyle(content)
+
+        case .cyberpunk:
+            cyberpunkStyle(content)
+
+        case .cartoon:
+            cartoonStyle(content)
+
+        case .handwritten:
+            handwrittenStyle(content)
+
+        case .calligraphy:
+            calligraphyStyle(content)
+
+        case .custom:
+            customStyle(content)
+        }
+    }
+
+    // MARK: - 材质类风格
+
+    @ViewBuilder
+    private func metallicStyle(_ content: Content) -> some View {
+        ZStack {
+            // 底层阴影
+            content
+                .foregroundColor(.black.opacity(0.3))
+                .offset(x: 2, y: 2)
+            // 金属渐变
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            .gray.opacity(0.3),
+                            .white,
+                            textColor,
+                            .white,
+                            .gray.opacity(0.3)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: .white.opacity(0.5), radius: 1, x: -1, y: -1)
+        }
+    }
+
+    @ViewBuilder
+    private func glassStyle(_ content: Content) -> some View {
+        content
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [
+                        .white.opacity(0.9),
+                        textColor.opacity(0.6),
+                        .white.opacity(0.8)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .shadow(color: .white.opacity(0.3), radius: 2, x: 0, y: -1)
+            .shadow(color: textColor.opacity(0.3), radius: 4, x: 0, y: 2)
+    }
+
+    @ViewBuilder
+    private func woodStyle(_ content: Content) -> some View {
+        ZStack {
+            content
+                .foregroundColor(.brown.opacity(0.5))
+                .offset(x: 1, y: 1)
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.6, green: 0.4, blue: 0.2),
+                            Color(red: 0.8, green: 0.5, blue: 0.2),
+                            Color(red: 0.5, green: 0.3, blue: 0.1)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+        }
+    }
+
+    @ViewBuilder
+    private func stoneStyle(_ content: Content) -> some View {
+        content
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [
+                        .gray,
+                        textColor,
+                        .gray.opacity(0.8)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .shadow(color: .black.opacity(0.3), radius: 1, x: 1, y: 1)
+    }
+
+    // MARK: - 氛围类风格
+
+    @ViewBuilder
+    private func fireStyle(_ content: Content) -> some View {
+        ZStack {
+            // 火焰光晕
+            content
+                .foregroundColor(.orange.opacity(0.5))
+                .blur(radius: 4)
+            // 主体渐变
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            .yellow,
+                            .orange,
+                            .red,
+                            .orange
+                        ],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                .shadow(color: .orange.opacity(0.8), radius: 8, x: 0, y: 0)
+                .shadow(color: .red.opacity(0.5), radius: 15, x: 0, y: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func iceStyle(_ content: Content) -> some View {
+        ZStack {
+            // 冰霜光晕
+            content
+                .foregroundColor(.cyan.opacity(0.3))
+                .blur(radius: 3)
+            // 主体渐变
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            .white,
+                            .cyan,
+                            Color(red: 0.5, green: 0.8, blue: 1.0),
+                            .white
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: .cyan.opacity(0.6), radius: 5, x: 0, y: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func electricStyle(_ content: Content) -> some View {
+        content
+            .foregroundColor(textColor)
+            .shadow(color: .cyan, radius: 2, x: 0, y: 0)
+            .shadow(color: .blue.opacity(0.8), radius: 5, x: 0, y: 0)
+            .shadow(color: .purple.opacity(0.6), radius: 10, x: 0, y: 0)
+            .shadow(color: .cyan, radius: 15, x: 0, y: 0)
+    }
+
+    @ViewBuilder
+    private func smokeStyle(_ content: Content) -> some View {
+        content
+            .foregroundColor(textColor.opacity(0.8))
+            .blur(radius: 0.5)
+            .shadow(color: textColor.opacity(0.3), radius: 8, x: 0, y: 0)
+            .shadow(color: .gray.opacity(0.2), radius: 15, x: 0, y: 0)
+    }
+
+    // MARK: - 风格类
+
+    @ViewBuilder
+    private func retroStyle(_ content: Content) -> some View {
+        ZStack {
+            // 复古阴影
+            content
+                .foregroundColor(.brown.opacity(0.4))
+                .offset(x: 3, y: 3)
+            // 主体
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.9, green: 0.7, blue: 0.3),
+                            Color(red: 0.8, green: 0.5, blue: 0.2),
+                            Color(red: 0.6, green: 0.3, blue: 0.1)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+        }
+    }
+
+    @ViewBuilder
+    private func cyberpunkStyle(_ content: Content) -> some View {
+        content
+            .foregroundColor(textColor)
+            .shadow(color: .cyan, radius: 1, x: -2, y: 0)
+            .shadow(color: Color(red: 1, green: 0, blue: 1), radius: 1, x: 2, y: 0)
+            .shadow(color: .cyan.opacity(0.8), radius: 5, x: 0, y: 0)
+            .shadow(color: Color(red: 1, green: 0, blue: 1).opacity(0.6), radius: 10, x: 0, y: 0)
+    }
+
+    @ViewBuilder
+    private func cartoonStyle(_ content: Content) -> some View {
+        ZStack {
+            // 粗描边
+            content
+                .foregroundColor(.black)
+                .offset(x: -2, y: 0)
+            content
+                .foregroundColor(.black)
+                .offset(x: 2, y: 0)
+            content
+                .foregroundColor(.black)
+                .offset(x: 0, y: -2)
+            content
+                .foregroundColor(.black)
+                .offset(x: 0, y: 2)
+            // 主体
+            content
+                .foregroundColor(textColor)
+        }
+    }
+
+    @ViewBuilder
+    private func handwrittenStyle(_ content: Content) -> some View {
+        content
+            .foregroundColor(textColor)
+            .italic()
+            .shadow(color: textColor.opacity(0.2), radius: 1, x: 1, y: 1)
+    }
+
+    @ViewBuilder
+    private func calligraphyStyle(_ content: Content) -> some View {
+        ZStack {
+            // 墨迹阴影
+            content
+                .foregroundColor(.black.opacity(0.2))
+                .offset(x: 1, y: 1)
+                .blur(radius: 1)
+            // 主体
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            .black,
+                            Color(white: 0.2),
+                            .black
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        }
+    }
+
+    // MARK: - 自定义风格
+
+    /// 将角度转换为 UnitPoint
+    private func unitPointFromAngle(_ degrees: Double) -> UnitPoint {
+        let radians = degrees * .pi / 180
+        return UnitPoint(x: 0.5 + 0.5 * cos(radians), y: 0.5 + 0.5 * sin(radians))
+    }
+
+    @ViewBuilder
+    private func customStyle(_ content: Content) -> some View {
+        if artisticConfig.strokeWidth > 0 || artisticConfig.shadowBlur > 0 || artisticConfig.outerGlowRadius > 0 {
+            customStyleWithEffects(content)
+        } else if artisticConfig.gradientStartColor != artisticConfig.gradientEndColor {
+            content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [artisticConfig.gradientStartColor, artisticConfig.gradientEndColor],
+                        startPoint: unitPointFromAngle(artisticConfig.gradientAngle),
+                        endPoint: unitPointFromAngle(artisticConfig.gradientAngle + 180)
+                    )
+                )
+        } else {
+            content
+        }
+    }
+
+    @ViewBuilder
+    private func customStyleWithEffects(_ content: Content) -> some View {
+        ZStack {
+            // 描边层
+            if artisticConfig.strokeWidth > 0 {
+                content
+                    .foregroundColor(artisticConfig.strokeColor)
+                    .offset(x: -artisticConfig.strokeWidth, y: 0)
+                content
+                    .foregroundColor(artisticConfig.strokeColor)
+                    .offset(x: artisticConfig.strokeWidth, y: 0)
+                content
+                    .foregroundColor(artisticConfig.strokeColor)
+                    .offset(x: 0, y: -artisticConfig.strokeWidth)
+                content
+                    .foregroundColor(artisticConfig.strokeColor)
+                    .offset(x: 0, y: artisticConfig.strokeWidth)
+            }
+
+            // 主内容
+            if artisticConfig.gradientStartColor != artisticConfig.gradientEndColor {
+                content
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [artisticConfig.gradientStartColor, artisticConfig.gradientEndColor],
+                            startPoint: unitPointFromAngle(artisticConfig.gradientAngle),
+                            endPoint: unitPointFromAngle(artisticConfig.gradientAngle + 180)
+                        )
+                    )
+                    .shadow(
+                        color: artisticConfig.shadowColor,
+                        radius: artisticConfig.shadowBlur,
+                        x: artisticConfig.shadowOffsetX,
+                        y: artisticConfig.shadowOffsetY
+                    )
+                    .shadow(
+                        color: artisticConfig.outerGlowColor.opacity(0.6),
+                        radius: artisticConfig.outerGlowRadius,
+                        x: 0, y: 0
+                    )
+            } else {
+                content
+                    .shadow(
+                        color: artisticConfig.shadowColor,
+                        radius: artisticConfig.shadowBlur,
+                        x: artisticConfig.shadowOffsetX,
+                        y: artisticConfig.shadowOffsetY
+                    )
+                    .shadow(
+                        color: artisticConfig.outerGlowColor.opacity(0.6),
+                        radius: artisticConfig.outerGlowRadius,
+                        x: 0, y: 0
+                    )
+            }
         }
     }
 }

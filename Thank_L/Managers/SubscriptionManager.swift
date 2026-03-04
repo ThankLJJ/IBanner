@@ -256,4 +256,25 @@ extension SubscriptionManager {
 
     /// 免费用户全屏展示的最大时长（秒）
     static let freeDisplayLimit: TimeInterval = 30
+
+    // MARK: - 艺术字与动效配置权限检查
+
+    /// 检查是否可以使用指定的艺术字风格
+    /// - Parameter style: 艺术字风格
+    /// - Returns: 是否可用（订阅用户或普通风格返回true）
+    func canUse(artisticStyle: ArtisticStyle) -> Bool {
+        return isSubscribed || !artisticStyle.isPremium
+    }
+
+    /// 检查是否可以使用艺术字自定义参数
+    /// - Returns: 是否可用（仅订阅用户可用）
+    func canUseArtisticCustomization() -> Bool {
+        return isSubscribed
+    }
+
+    /// 检查是否可以使用动效参数调整
+    /// - Returns: 是否可用（仅订阅用户可用）
+    func canUseAnimationCustomization() -> Bool {
+        return isSubscribed
+    }
 }
