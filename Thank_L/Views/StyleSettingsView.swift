@@ -95,19 +95,25 @@ struct StyleSettingsView: View {
                 VStack(spacing: 24) {
                     // 预览区域
                     previewSection
-                    
+
                     // 文字设置区域
                     textSettingsSection
-                    
+
+                    // 艺术字样式区域 (新增)
+                    artisticStyleSection
+
                     // 颜色设置区域
                     colorSettingsSection
-                    
+
                     // 背景设置区域
                     backgroundSettingsSection
-                    
+
                     // 动画设置区域
                     animationSettingsSection
-                    
+
+                    // 动效参数区域 (新增)
+                    animationConfigSection
+
                     // 预设样式区域
                     presetStylesSection
                 }
@@ -449,7 +455,457 @@ struct StyleSettingsView: View {
                 #endif
         )
     }
-    
+
+    // MARK: - 艺术字样式区域
+    private var artisticStyleSection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("艺术字样式")
+                    .font(.headline)
+                Spacer()
+                if !subscriptionManager.isSubscribed {
+                    Image(systemName: "crown.fill")
+                        .foregroundColor(.yellow)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // 艺术字风格选择
+            VStack(alignment: .leading, spacing: 12) {
+                Text("预设风格")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                // 材质类
+                Text("材质")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(ArtisticStyle.allCases.filter { $0.category == .material }, id: \.self) { style in
+                        artisticStyleButton(style)
+                    }
+                }
+
+                // 氛围类
+                Text("氛围")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(ArtisticStyle.allCases.filter { $0.category == .atmosphere }, id: \.self) { style in
+                        artisticStyleButton(style)
+                    }
+                }
+
+                // 风格类
+                Text("风格")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(ArtisticStyle.allCases.filter { $0.category == .style }, id: \.self) { style in
+                        artisticStyleButton(style)
+                    }
+                }
+            }
+
+            // 自定义参数（仅订阅用户）
+            if bannerStyle.artisticStyle == .custom && subscriptionManager.isSubscribed {
+                Divider()
+                artisticCustomConfigView
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                #if os(iOS)
+                .fill(Color.platformSystemGray6)
+                #else
+                .fill(Color.gray.opacity(0.1))
+                #endif
+        )
+    }
+
+    // MARK: - 艺术字风格按钮
+    private func artisticStyleButton(_ style: ArtisticStyle) -> some View {
+        let isSelected = bannerStyle.artisticStyle == style
+        let isLocked = style.isPremium && !subscriptionManager.isSubscribed
+
+        return Button {
+            if isLocked {
+                showingPremiumUpgrade = true
+            } else {
+                bannerStyle.artisticStyle = style
+            }
+        } label: {
+            VStack(spacing: 4) {
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.caption)
+                }
+                Text(style.displayName)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? Color.accentColor : Color.clear)
+            )
+            .foregroundColor(isSelected ? .white : (isLocked ? .secondary : .primary))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - 艺术字自定义参数视图
+    private var artisticCustomConfigView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("自定义参数")
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            // 描边
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("描边粗细")
+                    Spacer()
+                    Text("\(Int(bannerStyle.artisticConfig.strokeWidth))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(value: $bannerStyle.artisticConfig.strokeWidth, in: 0...10, step: 1)
+            }
+
+            // 阴影模糊
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("阴影模糊")
+                    Spacer()
+                    Text("\(Int(bannerStyle.artisticConfig.shadowBlur))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(value: $bannerStyle.artisticConfig.shadowBlur, in: 0...20, step: 1)
+            }
+
+            // 外发光
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("外发光半径")
+                    Spacer()
+                    Text("\(Int(bannerStyle.artisticConfig.outerGlowRadius))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(value: $bannerStyle.artisticConfig.outerGlowRadius, in: 0...30, step: 1)
+            }
+        }
+    }
+
+    // MARK: - 动效参数区域
+    private var animationConfigSection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("动效参数")
+                    .font(.headline)
+                Spacer()
+                if !subscriptionManager.isSubscribed {
+                    Image(systemName: "crown.fill")
+                        .foregroundColor(.yellow)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            if subscriptionManager.isSubscribed {
+                // 根据当前动效类型显示对应参数
+                animationConfigControls
+            } else {
+                // 未订阅时显示模糊遮罩
+                VStack(spacing: 12) {
+                    Image(systemName: "crown.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(.yellow)
+                    Text("订阅解锁动效参数调整")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Button("立即订阅") {
+                        showingPremiumUpgrade = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                #if os(iOS)
+                .fill(Color.platformSystemGray6)
+                #else
+                .fill(Color.gray.opacity(0.1))
+                #endif
+        )
+    }
+
+    // MARK: - 动效参数控件
+    @ViewBuilder
+    private var animationConfigControls: some View {
+        switch bannerStyle.animationType {
+        case .scroll:
+            scrollConfigControls
+        case .blink:
+            blinkConfigControls
+        case .breathing:
+            breathingConfigControls
+        case .bounce:
+            bounceConfigControls
+        case .particles:
+            particlesConfigControls
+        case .wave:
+            waveConfigControls
+        case .led:
+            ledConfigControls
+        default:
+            Text("该动效暂无可调参数")
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, 20)
+        }
+    }
+
+    // MARK: - 滚动参数控件
+    private var scrollConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle("中间暂停", isOn: Binding(
+                get: { bannerStyle.scrollConfig?.pauseAtCenter ?? false },
+                set: { bannerStyle.scrollConfig = (bannerStyle.scrollConfig ?? .default); bannerStyle.scrollConfig?.pauseAtCenter = $0 }
+            ))
+        }
+    }
+
+    // MARK: - 闪烁参数控件
+    private var blinkConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("闪烁频率")
+                    Spacer()
+                    Text("\(String(format: "%.1f", bannerStyle.blinkConfig?.frequency ?? 1.0))次/秒")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.blinkConfig?.frequency ?? 1.0 },
+                        set: { bannerStyle.blinkConfig = (bannerStyle.blinkConfig ?? .default); bannerStyle.blinkConfig?.frequency = $0 }
+                    ),
+                    in: 0.5...3.0,
+                    step: 0.1
+                )
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("最低透明度")
+                    Spacer()
+                    Text("\(Int((bannerStyle.blinkConfig?.minOpacity ?? 0.3) * 100))%")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.blinkConfig?.minOpacity ?? 0.3 },
+                        set: { bannerStyle.blinkConfig = (bannerStyle.blinkConfig ?? .default); bannerStyle.blinkConfig?.minOpacity = $0 }
+                    ),
+                    in: 0...0.5,
+                    step: 0.05
+                )
+            }
+        }
+    }
+
+    // MARK: - 呼吸灯参数控件
+    private var breathingConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("最小缩放")
+                    Spacer()
+                    Text("\(String(format: "%.1f", bannerStyle.breathingConfig?.minScale ?? 0.8))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.breathingConfig?.minScale ?? 0.8 },
+                        set: { bannerStyle.breathingConfig = (bannerStyle.breathingConfig ?? .default); bannerStyle.breathingConfig?.minScale = $0 }
+                    ),
+                    in: 0.5...1.0,
+                    step: 0.05
+                )
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("最大缩放")
+                    Spacer()
+                    Text("\(String(format: "%.1f", bannerStyle.breathingConfig?.maxScale ?? 1.2))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.breathingConfig?.maxScale ?? 1.2 },
+                        set: { bannerStyle.breathingConfig = (bannerStyle.breathingConfig ?? .default); bannerStyle.breathingConfig?.maxScale = $0 }
+                    ),
+                    in: 1.0...1.5,
+                    step: 0.05
+                )
+            }
+        }
+    }
+
+    // MARK: - 弹跳参数控件
+    private var bounceConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("弹跳高度")
+                    Spacer()
+                    Text("\(Int(bannerStyle.bounceConfig?.bounceHeight ?? 20))px")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.bounceConfig?.bounceHeight ?? 20 },
+                        set: { bannerStyle.bounceConfig = (bannerStyle.bounceConfig ?? .default); bannerStyle.bounceConfig?.bounceHeight = $0 }
+                    ),
+                    in: 5...50,
+                    step: 1
+                )
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("弹性系数")
+                    Spacer()
+                    Text("\(String(format: "%.1f", bannerStyle.bounceConfig?.elasticity ?? 0.3))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.bounceConfig?.elasticity ?? 0.3 },
+                        set: { bannerStyle.bounceConfig = (bannerStyle.bounceConfig ?? .default); bannerStyle.bounceConfig?.elasticity = $0 }
+                    ),
+                    in: 0.1...0.8,
+                    step: 0.05
+                )
+            }
+        }
+    }
+
+    // MARK: - 粒子参数控件
+    private var particlesConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("粒子数量")
+                    Spacer()
+                    Text("\(bannerStyle.particlesConfig?.particleCount ?? 30)")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { Double(bannerStyle.particlesConfig?.particleCount ?? 30) },
+                        set: { bannerStyle.particlesConfig = (bannerStyle.particlesConfig ?? .default); bannerStyle.particlesConfig?.particleCount = Int($0) }
+                    ),
+                    in: 10...100,
+                    step: 5
+                )
+            }
+        }
+    }
+
+    // MARK: - 波浪参数控件
+    private var waveConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("波浪振幅")
+                    Spacer()
+                    Text("\(Int(bannerStyle.waveConfig?.amplitude ?? 15))px")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.waveConfig?.amplitude ?? 15 },
+                        set: { bannerStyle.waveConfig = (bannerStyle.waveConfig ?? .default); bannerStyle.waveConfig?.amplitude = $0 }
+                    ),
+                    in: 5...30,
+                    step: 1
+                )
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("波浪频率")
+                    Spacer()
+                    Text("\(String(format: "%.2f", bannerStyle.waveConfig?.frequency ?? 0.5))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.waveConfig?.frequency ?? 0.5 },
+                        set: { bannerStyle.waveConfig = (bannerStyle.waveConfig ?? .default); bannerStyle.waveConfig?.frequency = $0 }
+                    ),
+                    in: 0.2...1.0,
+                    step: 0.05
+                )
+            }
+        }
+    }
+
+    // MARK: - LED参数控件
+    private var ledConfigControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("点间距")
+                    Spacer()
+                    Text("\(Int(bannerStyle.ledConfig?.dotSpacing ?? 6))px")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.ledConfig?.dotSpacing ?? 6 },
+                        set: { bannerStyle.ledConfig = (bannerStyle.ledConfig ?? .default); bannerStyle.ledConfig?.dotSpacing = $0 }
+                    ),
+                    in: 4...12,
+                    step: 1
+                )
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("发光强度")
+                    Spacer()
+                    Text("\(Int((bannerStyle.ledConfig?.glowIntensity ?? 0.5) * 100))%")
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.ledConfig?.glowIntensity ?? 0.5 },
+                        set: { bannerStyle.ledConfig = (bannerStyle.ledConfig ?? .default); bannerStyle.ledConfig?.glowIntensity = $0 }
+                    ),
+                    in: 0...1,
+                    step: 0.1
+                )
+            }
+
+            Toggle("闪烁效果", isOn: Binding(
+                get: { bannerStyle.ledConfig?.flickerEnabled ?? true },
+                set: { bannerStyle.ledConfig = (bannerStyle.ledConfig ?? .default); bannerStyle.ledConfig?.flickerEnabled = $0 }
+            ))
+        }
+    }
+
     // MARK: - 颜色设置区域
     private var colorSettingsSection: some View {
         VStack(spacing: 16) {
