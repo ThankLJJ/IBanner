@@ -62,6 +62,7 @@ struct ContentView: View {
     @State private var typewriterText: String = ""
     @State private var typewriterIndex: Int = 0
     @State private var flashOpacities: [Double] = Array(repeating: 0, count: 3)
+    @State private var flashPositions: [CGPoint] = Array(repeating: .zero, count: 3)
     @State private var particles: [ParticleData] = []
     @State private var ledPhase: CGFloat = 0
     @State private var animationTimer: Timer?
@@ -211,9 +212,11 @@ struct ContentView: View {
         .sheet(isPresented: $showingSubscription) {
             SubscriptionView()
         }
+        #if os(iOS)
         .sheet(isPresented: $showingImagePicker) {
             imagePickerSheet
         }
+        #endif
         .sheet(isPresented: $showingPremiumUpgrade) {
             PremiumUpgradeSheet(
                 featureName: premiumFeatureName,
@@ -244,14 +247,11 @@ struct ContentView: View {
             // 背景图
             if bannerStyle.backgroundType == .image,
                let path = bannerStyle.backgroundImagePath,
-               let url = URL(string: "file://" + path) {
-                AsyncImage(url: url) { phase in
-                    if case .success(let img) = phase {
-                        img.resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .opacity(bannerStyle.backgroundImageOpacity)
-                    }
-                }
+               let image = loadBackgroundImage(from: path) {
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .opacity(bannerStyle.backgroundImageOpacity)
             }
 
             // 文字
@@ -336,6 +336,7 @@ struct ContentView: View {
                     textView(text)
                         .opacity(flashOpacities[i])
                         .scaleEffect(0.8 + flashOpacities[i] * 0.2)
+                        .position(flashPositions[i])
                 }
             }
             .onAppear { startRandomFlashAnimation() }
@@ -394,6 +395,7 @@ struct ContentView: View {
             .multilineTextAlignment(.center)
             .lineLimit(2)
             .padding(.horizontal, 24)
+            .modifier(PreviewFontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
     }
 
     private func font() -> Font {
@@ -585,29 +587,39 @@ struct ContentView: View {
     }
 
     private func customColorButton(for type: ColorPickerType) -> some View {
-        Button {
-            colorPickerType = type
-            tempColor = type == .text ? bannerStyle.textColor : bannerStyle.backgroundColor
-            showingColorPicker = true
-        } label: {
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [.red, .orange, .yellow, .green, .blue, .purple],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+        let colorBinding: Binding<Color> = Binding(
+            get: { type == .text ? bannerStyle.textColor : bannerStyle.backgroundColor },
+            set: { newColor in
+                if type == .text {
+                    bannerStyle.textColor = newColor
+                } else {
+                    bannerStyle.backgroundColor = newColor
+                }
+            }
+        )
+
+        return ColorPicker("", selection: colorBinding, supportsOpacity: false)
+            .labelsHidden()
+            .overlay(
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.red, .orange, .yellow, .green, .blue, .purple],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .frame(width: 28, height: 28)
-                .overlay(
-                    Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-                .overlay(
-                    Image(systemName: "plus")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white)
-                )
-        }
+                    .frame(width: 28, height: 28)
+                    .overlay(
+                        Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .overlay(
+                        Image(systemName: "plus")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                    )
+                    .allowsHitTesting(false)
+            )
     }
 
     // MARK: - 动画设置区域
@@ -724,7 +736,48 @@ struct ContentView: View {
                         showingPremiumUpgrade = true
                         return
                     }
-                    showingImagePicker = true
+                    #if os(macOS)
+                    // 直接打开文件选择器
+                    let panel = NSOpenPanel()
+                    panel.allowedContentTypes = [.image]
+                    panel.allowsMultipleSelection = false
+
+                    if panel.runModal() == .OK,
+                       let url = panel.url,
+                       let image = NSImage(contentsOf: url) {
+                        selectedNSImage = image
+                        selectedImage = Image(nsImage: image)
+
+                        if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                            bannerStyle.backgroundType = .image
+                            bannerStyle.backgroundImagePath = savedPath
+                        }
+                    }
+                    #else
+                    // iOS 直接打开照片选择器
+                    imagePickerCoordinator = ImagePickerCoordinator { image in
+                        selectedUIImage = image
+                        selectedImage = Image(uiImage: image)
+
+                        if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                            bannerStyle.backgroundType = .image
+                            bannerStyle.backgroundImagePath = savedPath
+                        }
+                    }
+
+                    let imagePicker = UIImagePickerController()
+                    imagePicker.sourceType = .photoLibrary
+                    imagePicker.delegate = imagePickerCoordinator
+
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let window = windowScene.windows.first {
+                        var topController = window.rootViewController
+                        while let presentedController = topController?.presentedViewController {
+                            topController = presentedController
+                        }
+                        topController?.present(imagePicker, animated: true)
+                    }
+                    #endif
                 } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 10)
@@ -754,27 +807,13 @@ struct ContentView: View {
                         }
 
                         if let imagePath = bannerStyle.backgroundImagePath,
-                           let url = URL(string: "file://" + imagePath) {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(height: 60)
-                                        .clipped()
-                                        .cornerRadius(10)
-                                default:
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "photo")
-                                            .font(.system(size: 16))
-                                            .foregroundColor(.accentColor)
-                                        Text(L10n.App.loading)
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
+                           let image = loadBackgroundImage(from: imagePath) {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 60)
+                                .clipped()
+                                .cornerRadius(10)
                         } else {
                             HStack(spacing: 6) {
                                 Image(systemName: "photo.badge.plus")
@@ -997,6 +1036,7 @@ struct ContentView: View {
                             selectedImage = Image(uiImage: image)
 
                             if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                                bannerStyle.backgroundType = .image
                                 bannerStyle.backgroundImagePath = savedPath
                             }
 
@@ -1031,6 +1071,7 @@ struct ContentView: View {
                         selectedImage = Image(nsImage: image)
 
                         if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                            bannerStyle.backgroundType = .image
                             bannerStyle.backgroundImagePath = savedPath
                         }
 
@@ -1144,11 +1185,25 @@ struct ContentView: View {
 
     private func startRandomFlashAnimation() {
         flashOpacities = [1.0, 0.0, 0.0]
+        // Initialize random positions within preview area (120 height, with margins)
+        flashPositions = (0..<3).map { _ in
+            CGPoint(
+                x: CGFloat.random(in: 60...200),
+                y: CGFloat.random(in: 25...95)
+            )
+        }
 
         flashTimer = Timer.scheduledTimer(withTimeInterval: 0.4 / bannerStyle.animationSpeed, repeats: true) { _ in
             let idx = Int.random(in: 0..<3)
             for i in 0..<3 {
                 flashOpacities[i] = i == idx ? 1.0 : 0.0
+            }
+            // Occasionally update position for the active flash
+            if Bool.random() {
+                flashPositions[idx] = CGPoint(
+                    x: CGFloat.random(in: 60...200),
+                    y: CGFloat.random(in: 25...95)
+                )
             }
         }
     }
@@ -1188,8 +1243,32 @@ struct ContentView: View {
         typewriterText = ""
         typewriterIndex = 0
         flashOpacities = [0, 0, 0]
+        flashPositions = Array(repeating: .zero, count: 3)
         particles = []
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { startAnimation() }
+    }
+
+    // MARK: - 辅助函数
+    /// 从相对路径加载背景图片
+    private func loadBackgroundImage(from relativePath: String) -> Image? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let imageURL = documentsPath.appendingPathComponent(relativePath)
+
+        guard FileManager.default.fileExists(atPath: imageURL.path) else {
+            return nil
+        }
+
+        #if os(iOS)
+        if let uiImage = UIImage(contentsOfFile: imageURL.path) {
+            return Image(uiImage: uiImage)
+        }
+        #elseif os(macOS)
+        if let nsImage = NSImage(contentsOf: imageURL) {
+            return Image(nsImage: nsImage)
+        }
+        #endif
+
+        return nil
     }
 
     // MARK: - 数据
@@ -1215,6 +1294,47 @@ struct ParticleData: Identifiable {
     var y: CGFloat
     var opacity: Double
     var size: CGFloat
+}
+
+// MARK: - 预览字体样式修饰符
+struct PreviewFontStyleModifier: ViewModifier {
+    let fontStyle: FontStyle
+    let textColor: Color
+
+    func body(content: Content) -> some View {
+        switch fontStyle {
+        case .normal:
+            content
+
+        case .artistic:
+            // 艺术字：渐变文字效果 + 立体阴影
+            ZStack {
+                // 底层阴影
+                content
+                    .foregroundColor(textColor.opacity(0.3))
+                    .offset(x: 2, y: 2)
+                // 渐变文字
+                content
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.white, textColor, textColor.opacity(0.8), .white],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+
+        case .neon:
+            // 霓虹灯效果：多层发光
+            content
+                .foregroundColor(textColor)
+                .shadow(color: textColor.opacity(0.5), radius: 1, x: 0, y: 0)
+                .shadow(color: textColor.opacity(0.6), radius: 3, x: 0, y: 0)
+                .shadow(color: textColor.opacity(0.7), radius: 6, x: 0, y: 0)
+                .shadow(color: textColor.opacity(0.8), radius: 12, x: 0, y: 0)
+                .shadow(color: textColor, radius: 20, x: 0, y: 0)
+        }
+    }
 }
 
 #Preview {

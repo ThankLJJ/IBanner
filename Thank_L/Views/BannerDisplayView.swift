@@ -851,32 +851,32 @@ struct FontStyleModifier: ViewModifier {
             content
             
         case .artistic:
-            content
-                .shadow(color: textColor.opacity(0.3), radius: 2, x: 2, y: 2)
-                .overlay(
-                    content
-                        .foregroundColor(.clear)
-                        .background(
-                            LinearGradient(
-                                colors: [textColor, textColor.opacity(0.7), textColor],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+            // 艺术字：渐变文字效果 + 立体阴影
+            ZStack {
+                // 底层阴影
+                content
+                    .foregroundColor(textColor.opacity(0.3))
+                    .offset(x: 2, y: 2)
+                // 渐变文字
+                content
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.white, textColor, textColor.opacity(0.8), .white],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .mask(content)
-                )
-                
+                    )
+            }
+
         case .neon:
+            // 霓虹灯效果：多层发光
             content
                 .foregroundColor(textColor)
-                .shadow(color: textColor, radius: 5, x: 0, y: 0)
-                .shadow(color: textColor, radius: 10, x: 0, y: 0)
-                .shadow(color: textColor, radius: 15, x: 0, y: 0)
-                .overlay(
-                    content
-                        .foregroundColor(.white)
-                        .opacity(0.8)
-                )
+                .shadow(color: textColor.opacity(0.5), radius: 1, x: 0, y: 0)
+                .shadow(color: textColor.opacity(0.6), radius: 3, x: 0, y: 0)
+                .shadow(color: textColor.opacity(0.7), radius: 6, x: 0, y: 0)
+                .shadow(color: textColor.opacity(0.8), radius: 12, x: 0, y: 0)
+                .shadow(color: textColor, radius: 20, x: 0, y: 0)
         }
     }
 }

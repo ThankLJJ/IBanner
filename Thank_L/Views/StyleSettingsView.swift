@@ -546,7 +546,48 @@ struct StyleSettingsView: View {
                         return
                     }
                     // 只有订阅用户才能选择图片
-                    showingImagePicker = true
+                    #if os(macOS)
+                    // macOS 直接打开文件选择器
+                    let panel = NSOpenPanel()
+                    panel.allowedContentTypes = [.image]
+                    panel.allowsMultipleSelection = false
+
+                    if panel.runModal() == .OK,
+                       let url = panel.url,
+                       let image = NSImage(contentsOf: url) {
+                        selectedNSImage = image
+                        selectedImage = Image(nsImage: image)
+
+                        if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                            bannerStyle.backgroundType = .image
+                            bannerStyle.backgroundImagePath = savedPath
+                        }
+                    }
+                    #else
+                    // iOS 直接打开照片选择器
+                    imagePickerCoordinator = ImagePickerCoordinator { image in
+                        selectedUIImage = image
+                        selectedImage = Image(uiImage: image)
+
+                        if let savedPath = BannerDataManager.shared.saveBackgroundImage(image) {
+                            bannerStyle.backgroundType = .image
+                            bannerStyle.backgroundImagePath = savedPath
+                        }
+                    }
+
+                    let imagePicker = UIImagePickerController()
+                    imagePicker.sourceType = .photoLibrary
+                    imagePicker.delegate = imagePickerCoordinator
+
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let window = windowScene.windows.first {
+                        var topController = window.rootViewController
+                        while let presentedController = topController?.presentedViewController {
+                            topController = presentedController
+                        }
+                        topController?.present(imagePicker, animated: true)
+                    }
+                    #endif
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 12)
@@ -577,25 +618,14 @@ struct StyleSettingsView: View {
                         }
 
                         if let imagePath = bannerStyle.backgroundImagePath,
-                           let url = URL(string: "file://" + imagePath) {
+                           let image = loadBackgroundImage(from: imagePath) {
                             // 显示已选择的图片
-                            AsyncImage(url: url) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(height: 120)
-                                    .clipped()
-                                    .cornerRadius(12)
-                            } placeholder: {
-                                VStack {
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(.blue)
-                                    Text(L10n.App.loading)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 120)
+                                .clipped()
+                                .cornerRadius(12)
                         } else {
                             // 未选择图片时的占位符
                             VStack(spacing: 8) {
@@ -1171,6 +1201,29 @@ struct StyleSettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - 辅助函数
+    /// 从相对路径加载背景图片
+    private func loadBackgroundImage(from relativePath: String) -> Image? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let imageURL = documentsPath.appendingPathComponent(relativePath)
+
+        guard FileManager.default.fileExists(atPath: imageURL.path) else {
+            return nil
+        }
+
+        #if os(iOS)
+        if let uiImage = UIImage(contentsOfFile: imageURL.path) {
+            return Image(uiImage: uiImage)
+        }
+        #elseif os(macOS)
+        if let nsImage = NSImage(contentsOf: imageURL) {
+            return Image(nsImage: nsImage)
+        }
+        #endif
+
+        return nil
     }
 }
 
