@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Skill(zcf:git-commit)"
+      "Skill(zcf:git-commit)",
+      "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics"
     ]
   }
 }

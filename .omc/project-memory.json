@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1772415634270,
+  "lastScanned": 1772517209414,
   "projectRoot": "/Users/l/Projects/Apple/Thank_L",
   "techStack": {
     "languages": [],
@@ -33,7 +33,7 @@
       "path": "Thank_L",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1772415634262,
+      "lastAccessed": 1772517209392,
       "keyFiles": [
         "Thank_LApp.swift"
       ]
@@ -42,7 +42,7 @@
       "path": "Thank_L.xcodeproj",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1772415634266,
+      "lastAccessed": 1772517209394,
       "keyFiles": [
         "project.pbxproj"
       ]
@@ -51,7 +51,7 @@
       "path": "Thank_LTests",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1772415634267,
+      "lastAccessed": 1772517209396,
       "keyFiles": [
         "Thank_LTests.swift"
       ]
@@ -60,7 +60,7 @@
       "path": "Thank_LUITests",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1772415634267,
+      "lastAccessed": 1772517209397,
       "keyFiles": [
         "Thank_LUITests.swift",
         "Thank_LUITestsLaunchTests.swift"
@@ -70,7 +70,7 @@
       "path": "Thank_L/Models",
       "purpose": "Data models",
       "fileCount": 1,
-      "lastAccessed": 1772415634268,
+      "lastAccessed": 1772517209397,
       "keyFiles": [
         "BannerModels.swift"
       ]
@@ -79,7 +79,7 @@
       "path": "Thank_L/Utils",
       "purpose": "Utility functions",
       "fileCount": 1,
-      "lastAccessed": 1772415634268,
+      "lastAccessed": 1772517209397,
       "keyFiles": [
         "Localizable.swift"
       ]
@@ -88,7 +88,7 @@
       "path": "Thank_L/Views",
       "purpose": "View templates",
       "fileCount": 7,
-      "lastAccessed": 1772415634268,
+      "lastAccessed": 1772517209397,
       "keyFiles": [
         "BannerDisplayView.swift",
         "ContentView.swift",
@@ -99,56 +99,44 @@
   "hotPaths": [
     {
       "path": "Thank_L/Views/ContentView.swift",
-      "accessCount": 43,
-      "lastAccessed": 1772430819336,
+      "accessCount": 85,
+      "lastAccessed": 1772593121724,
       "type": "file"
     },
     {
       "path": "Thank_L/Views/StyleSettingsView.swift",
-      "accessCount": 38,
-      "lastAccessed": 1772430819780,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Views/SubscriptionView.swift",
-      "accessCount": 14,
-      "lastAccessed": 1772416815330,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Models/BannerModels.swift",
-      "accessCount": 4,
-      "lastAccessed": 1772416870313,
-      "type": "directory"
-    },
-    {
-      "path": "Thank_L/Views/PremiumUpgradeSheet.swift",
-      "accessCount": 4,
-      "lastAccessed": 1772419392341,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Views/BannerDisplayView.swift",
-      "accessCount": 2,
-      "lastAccessed": 1772419980176,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Resources/Configuration.storekit",
-      "accessCount": 2,
-      "lastAccessed": 1772420329717,
+      "accessCount": 21,
+      "lastAccessed": 1772520308447,
       "type": "file"
     },
     {
       "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1772416847034,
+      "accessCount": 13,
+      "lastAccessed": 1772517602374,
       "type": "directory"
     },
     {
-      "path": "Thank_L/Managers/SubscriptionManager.swift",
+      "path": "Thank_L/Views/BannerDisplayView.swift",
+      "accessCount": 9,
+      "lastAccessed": 1772518258267,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views",
+      "accessCount": 4,
+      "lastAccessed": 1772517947244,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Managers/BannerDataManager.swift",
+      "accessCount": 3,
+      "lastAccessed": 1772518348998,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Models/BannerModels.swift",
       "accessCount": 1,
-      "lastAccessed": 1772420329729,
+      "lastAccessed": 1772517419761,
       "type": "file"
     }
   ],
