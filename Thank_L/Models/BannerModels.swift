@@ -264,6 +264,90 @@ struct ArtisticStyleConfig: Codable {
     static let `default` = ArtisticStyleConfig()
 }
 
+// MARK: - 霓虹字风格枚举
+/// 预设的霓虹字风格（按效果类型分类）
+enum NeonStyle: String, CaseIterable, Codable {
+    // 基础类
+    case basic = "基础发光"
+    case soft = "柔和光晕"
+    case sharp = "锐利光芒"
+
+    // 动态类
+    case pulse = "脉冲"
+    case flicker = "闪烁"
+    case breathing = "呼吸"
+
+    // 特效类
+    case glitch = "故障"
+    case gradient = "渐变"
+    case rainbow = "彩虹"
+
+    // 高级类
+    case cyberpunk = "赛博朋克"
+    case retro = "复古霓虹"
+    case custom = "自定义"
+
+    var displayName: String {
+        return self.rawValue
+    }
+
+    /// 风格分类
+    enum Category: String, CaseIterable {
+        case basic = "基础"
+        case dynamic = "动态"
+        case effect = "特效"
+        case advanced = "高级"
+
+        var displayName: String { self.rawValue }
+    }
+
+    /// 获取风格所属分类
+    var category: Category? {
+        switch self {
+        case .basic, .soft, .sharp:
+            return .basic
+        case .pulse, .flicker, .breathing:
+            return .dynamic
+        case .glitch, .gradient, .rainbow:
+            return .effect
+        case .cyberpunk, .retro, .custom:
+            return .advanced
+        }
+    }
+
+    /// 是否为高级风格（需要订阅）
+    var isPremium: Bool {
+        return self != .basic
+    }
+}
+
+// MARK: - 霓虹字自定义参数配置
+/// 霓虹字的完整配置参数
+struct NeonStyleConfig: Codable {
+    // === 基础层 ===
+    var glowColor: Color = .cyan           // 主发光颜色
+    var glowRadius: CGFloat = 10           // 发光半径 (0-50)
+    var glowIntensity: Double = 1.0        // 发光强度 (0-2)
+
+    // === 进阶层 - 多层发光 ===
+    var secondaryGlowColor: Color? = nil   // 次级发光颜色
+    var secondaryGlowRadius: CGFloat = 20  // 次级发光半径 (0-80)
+    var enableMultipleLayers: Bool = false // 是否启用多层发光
+
+    // === 动态效果 ===
+    var pulseSpeed: Double = 1.0           // 脉冲速度 (0.5-3)
+    var flickerFrequency: Double = 2.0     // 闪烁频率 (0.5-5)
+    var breathingRange: Double = 0.3       // 呼吸范围 (0.1-0.5)
+
+    // === 特效 ===
+    var glitchIntensity: Double = 0        // 故障强度 (0-1)
+    var gradientEndColor: Color? = nil     // 渐变结束色
+    var rainbowSpeed: Double = 1.0         // 彩虹速度 (0.5-3)
+
+    /// 默认配置
+    static let `default` = NeonStyleConfig()
+}
+
 // MARK: - 滚动动效配置
 struct ScrollAnimationConfig: Codable {
     var direction: ScrollDirection = .leftToRight
@@ -421,6 +505,13 @@ struct BannerStyle: Codable {
 
     /// 艺术字自定义参数
     var artisticConfig: ArtisticStyleConfig = .default
+
+    // === 新增：霓虹字配置 ===
+    /// 霓虹字风格
+    var neonStyle: NeonStyle = .basic
+
+    /// 霓虹字自定义参数
+    var neonConfig: NeonStyleConfig = .default
 
     // === 新增：动效专属配置 ===
     var scrollConfig: ScrollAnimationConfig?

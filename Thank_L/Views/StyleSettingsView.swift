@@ -99,8 +99,12 @@ struct StyleSettingsView: View {
                     // 文字设置区域
                     textSettingsSection
 
-                    // 艺术字样式区域 (新增)
-                    artisticStyleSection
+                    // 字体样式配置区域 - 条件显示
+                    if bannerStyle.fontStyle == .artistic {
+                        artisticStyleSection
+                    } else if bannerStyle.fontStyle == .neon {
+                        neonStyleSection
+                    }
 
                     // 颜色设置区域
                     colorSettingsSection
@@ -266,38 +270,25 @@ struct StyleSettingsView: View {
             )
 
         case .blink:
-            // 闪烁效果预览
-            Text(previewText)
-                .font(.system(
-                    size: min(bannerStyle.fontSize * 0.4, 24),
-                    weight: bannerStyle.isBold ? .bold : .regular
-                ))
-                .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .padding(.horizontal, 16)
-                .opacity(previewIsBlinking ? 0.3 : 1.0)
+            // 闪烁效果预览 - 使用配置参数
+            let minOpacity = bannerStyle.blinkConfig?.minOpacity ?? 0.3
+            let frequency = bannerStyle.blinkConfig?.frequency ?? 1.0
+            previewTextWithStyle(previewText)
+                .opacity(previewIsBlinking ? minOpacity : 1.0)
                 .animation(
-                    .easeInOut(duration: 0.8 / bannerStyle.animationSpeed)
+                    .easeInOut(duration: 0.5 / (frequency * bannerStyle.animationSpeed))
                     .repeatForever(autoreverses: true),
                     value: previewIsBlinking
                 )
 
         case .breathing:
-            // 呼吸灯效果预览
-            Text(previewText)
-                .font(.system(
-                    size: min(bannerStyle.fontSize * 0.4, 24),
-                    weight: bannerStyle.isBold ? .bold : .regular
-                ))
-                .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .padding(.horizontal, 16)
+            // 呼吸灯效果预览 - 使用配置参数
+            let minScale = bannerStyle.breathingConfig?.minScale ?? 0.8
+            let maxScale = bannerStyle.breathingConfig?.maxScale ?? 1.2
+            let minOpacity = bannerStyle.breathingConfig?.minOpacity ?? 0.5
+            previewTextWithStyle(previewText)
                 .opacity(previewBreathingOpacity)
-                .scaleEffect(0.8 + previewBreathingOpacity * 0.2)
+                .scaleEffect(minScale + (previewBreathingOpacity - minOpacity) * (maxScale - minScale) / (1.0 - minOpacity))
                 .animation(
                     .easeInOut(duration: 2.0 / bannerStyle.animationSpeed)
                     .repeatForever(autoreverses: true),
@@ -305,44 +296,76 @@ struct StyleSettingsView: View {
                 )
 
         case .wave:
-            // 波浪效果预览
+            // 波浪效果预览 - 使用配置参数
+            let amplitude = bannerStyle.waveConfig?.amplitude ?? 15
+            let waveFrequency = bannerStyle.waveConfig?.frequency ?? 0.5
             HStack(spacing: 0) {
                 ForEach(Array(previewText.enumerated()), id: \.offset) { index, char in
-                    Text(String(char))
-                        .font(.system(
-                            size: min(bannerStyle.fontSize * 0.4, 24),
-                            weight: bannerStyle.isBold ? .bold : .regular
-                        ))
-                        .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                        .offset(y: sin(previewWavePhase + CGFloat(index) * 0.5) * 8)
+                    previewCharWithStyle(String(char))
+                        .offset(y: sin(previewWavePhase + CGFloat(index) * CGFloat(waveFrequency)) * CGFloat(amplitude) * 0.5)
                 }
             }
             .padding(.horizontal, 16)
 
         case .bounce:
-            // 弹跳效果预览
-            Text(previewText)
-                .font(.system(
-                    size: min(bannerStyle.fontSize * 0.4, 24),
-                    weight: bannerStyle.isBold ? .bold : .regular
-                ))
-                .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .padding(.horizontal, 16)
+            // 弹跳效果预览 - 使用配置参数
+            let bounceHeight = bannerStyle.bounceConfig?.bounceHeight ?? 20
+            let elasticity = bannerStyle.bounceConfig?.elasticity ?? 0.3
+            previewTextWithStyle(previewText)
                 .scaleEffect(previewBounceScale)
-                .offset(y: (previewBounceScale - 1.0) * -20)
+                .offset(y: (previewBounceScale - 1.0) * CGFloat(-bounceHeight) * CGFloat(elasticity))
                 .animation(
-                    .spring(response: 0.5, dampingFraction: 0.3, blendDuration: 0.5)
+                    .spring(response: 0.5, dampingFraction: CGFloat(elasticity), blendDuration: 0.5)
                     .repeatForever(autoreverses: true),
                     value: previewBounceScale
                 )
 
         default:
             // 静态显示（包括 none, typewriter, randomFlash, particles, led）
-            Text(previewText)
+            previewTextWithStyle(previewText)
+        }
+    }
+
+    // MARK: - 预览文字样式辅助方法
+    @ViewBuilder
+    private func previewTextWithStyle(_ text: String) -> some View {
+        switch bannerStyle.fontStyle {
+        case .artistic:
+            Text(text)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .modifier(ArtisticStyleModifier(
+                    artisticStyle: bannerStyle.artisticStyle,
+                    artisticConfig: bannerStyle.artisticConfig,
+                    textColor: bannerStyle.textColor
+                ))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 16)
+
+        case .neon:
+            Text(text)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .modifier(NeonStyleModifier(
+                    neonStyle: bannerStyle.neonStyle,
+                    neonConfig: bannerStyle.neonConfig,
+                    textColor: bannerStyle.textColor
+                ))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .padding(.horizontal, 16)
+
+        case .normal:
+            Text(text)
                 .font(.system(
                     size: min(bannerStyle.fontSize * 0.4, 24),
                     weight: bannerStyle.isBold ? .bold : .regular
@@ -352,6 +375,48 @@ struct StyleSettingsView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .padding(.horizontal, 16)
+        }
+    }
+
+    @ViewBuilder
+    private func previewCharWithStyle(_ char: String) -> some View {
+        switch bannerStyle.fontStyle {
+        case .artistic:
+            Text(char)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .modifier(ArtisticStyleModifier(
+                    artisticStyle: bannerStyle.artisticStyle,
+                    artisticConfig: bannerStyle.artisticConfig,
+                    textColor: bannerStyle.textColor
+                ))
+
+        case .neon:
+            Text(char)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .modifier(NeonStyleModifier(
+                    neonStyle: bannerStyle.neonStyle,
+                    neonConfig: bannerStyle.neonConfig,
+                    textColor: bannerStyle.textColor
+                ))
+
+        case .normal:
+            Text(char)
+                .font(.system(
+                    size: min(bannerStyle.fontSize * 0.4, 24),
+                    weight: bannerStyle.isBold ? .bold : .regular
+                ))
+                .foregroundColor(bannerStyle.textColor)
+                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
         }
     }
 
@@ -459,6 +524,15 @@ struct StyleSettingsView: View {
     // MARK: - 艺术字样式区域
     private var artisticStyleSection: some View {
         VStack(spacing: 16) {
+            // 测试标记 - 如果看到这个红色文字说明代码已更新
+            Text("🎨 新功能区域 🎨")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.red)
+                .cornerRadius(8)
+
             HStack {
                 Text("艺术字样式")
                     .font(.headline)
@@ -598,6 +672,195 @@ struct StyleSettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 Slider(value: $bannerStyle.artisticConfig.outerGlowRadius, in: 0...30, step: 1)
+            }
+        }
+    }
+
+    // MARK: - 霓虹字样式区域
+    private var neonStyleSection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("霓虹字样式")
+                    .font(.headline)
+                Spacer()
+                if !subscriptionManager.isSubscribed {
+                    Image(systemName: "crown.fill")
+                        .foregroundColor(.yellow)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // 霓虹字风格选择
+            VStack(alignment: .leading, spacing: 12) {
+                Text("预设风格")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                // 基础类
+                Text("基础")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(NeonStyle.allCases.filter { $0.category == .basic }, id: \.self) { style in
+                        neonStyleButton(style)
+                    }
+                }
+
+                // 动态类
+                Text("动态")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(NeonStyle.allCases.filter { $0.category == .dynamic }, id: \.self) { style in
+                        neonStyleButton(style)
+                    }
+                }
+
+                // 特效类
+                Text("特效")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(NeonStyle.allCases.filter { $0.category == .effect }, id: \.self) { style in
+                        neonStyleButton(style)
+                    }
+                }
+
+                // 高级类
+                Text("高级")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
+                    ForEach(NeonStyle.allCases.filter { $0.category == .advanced }, id: \.self) { style in
+                        neonStyleButton(style)
+                    }
+                }
+            }
+
+            // 自定义参数（仅订阅用户）
+            if bannerStyle.neonStyle == .custom && subscriptionManager.isSubscribed {
+                Divider()
+                neonCustomConfigView
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                #if os(iOS)
+                .fill(Color.platformSystemGray6)
+                #else
+                .fill(Color.gray.opacity(0.1))
+                #endif
+        )
+    }
+
+    // MARK: - 霓虹字风格按钮
+    private func neonStyleButton(_ style: NeonStyle) -> some View {
+        let isSelected = bannerStyle.neonStyle == style
+        let isLocked = style.isPremium && !subscriptionManager.isSubscribed
+
+        return Button {
+            if isLocked {
+                showingPremiumUpgrade = true
+            } else {
+                bannerStyle.neonStyle = style
+            }
+        } label: {
+            VStack(spacing: 4) {
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.caption)
+                }
+                Text(style.displayName)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? Color.accentColor : Color.clear)
+            )
+            .foregroundColor(isSelected ? .white : (isLocked ? .secondary : .primary))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - 霓虹字自定义参数视图
+    private var neonCustomConfigView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("自定义参数")
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            // 发光颜色
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("发光颜色")
+                    Spacer()
+                    Circle()
+                        .fill(bannerStyle.neonConfig.glowColor)
+                        .frame(width: 20, height: 20)
+                }
+                // 简化：使用预设颜色
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 8) {
+                    ForEach([Color.cyan, .blue, .purple, .pink, .red, .orange, .yellow, .green, .white], id: \.self) { color in
+                        Button {
+                            bannerStyle.neonConfig.glowColor = color
+                        } label: {
+                            Circle()
+                                .fill(color)
+                                .frame(width: 24, height: 24)
+                                .overlay(
+                                    Circle()
+                                        .stroke(bannerStyle.neonConfig.glowColor == color ? Color.accentColor : Color.clear, lineWidth: 2)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            // 发光半径
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("发光半径")
+                    Spacer()
+                    Text("\(Int(bannerStyle.neonConfig.glowRadius))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(value: $bannerStyle.neonConfig.glowRadius, in: 0...50, step: 2)
+            }
+
+            // 发光强度
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("发光强度")
+                    Spacer()
+                    Text("\(String(format: "%.1f", bannerStyle.neonConfig.glowIntensity))")
+                        .foregroundColor(.secondary)
+                }
+                Slider(value: $bannerStyle.neonConfig.glowIntensity, in: 0.5...2.0, step: 0.1)
+            }
+
+            // 多层发光开关
+            Toggle("多层发光", isOn: $bannerStyle.neonConfig.enableMultipleLayers)
+
+            // 故障强度（仅当风格为故障时显示）
+            if bannerStyle.neonStyle == .glitch || bannerStyle.neonStyle == .custom {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("故障强度")
+                        Spacer()
+                        Text("\(Int(bannerStyle.neonConfig.glitchIntensity * 100))%")
+                            .foregroundColor(.secondary)
+                    }
+                    Slider(value: $bannerStyle.neonConfig.glitchIntensity, in: 0...1, step: 0.1)
+                }
             }
         }
     }

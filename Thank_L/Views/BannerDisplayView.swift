@@ -1319,6 +1319,244 @@ struct ArtisticStyleModifier: ViewModifier {
     }
 }
 
+// MARK: - 霓虹字风格修饰符
+struct NeonStyleModifier: ViewModifier {
+    let neonStyle: NeonStyle
+    let neonConfig: NeonStyleConfig
+    let textColor: Color
+
+    func body(content: Content) -> some View {
+        switch neonStyle {
+        case .basic:
+            basicNeon(content)
+
+        case .soft:
+            softNeon(content)
+
+        case .sharp:
+            sharpNeon(content)
+
+        case .pulse:
+            pulseNeon(content)
+
+        case .flicker:
+            flickerNeon(content)
+
+        case .breathing:
+            breathingNeon(content)
+
+        case .glitch:
+            glitchNeon(content)
+
+        case .gradient:
+            gradientNeon(content)
+
+        case .rainbow:
+            rainbowNeon(content)
+
+        case .cyberpunk:
+            cyberpunkNeon(content)
+
+        case .retro:
+            retroNeon(content)
+
+        case .custom:
+            customNeon(content)
+        }
+    }
+
+    // MARK: - 基础类风格
+
+    @ViewBuilder
+    private func basicNeon(_ content: Content) -> some View {
+        content
+            .foregroundColor(neonConfig.glowColor)
+            .shadow(color: neonConfig.glowColor.opacity(0.5), radius: CGFloat(neonConfig.glowRadius * 0.2), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.6 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.4), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.7), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+    }
+
+    @ViewBuilder
+    private func softNeon(_ content: Content) -> some View {
+        content
+            .foregroundColor(neonConfig.glowColor)
+            .shadow(color: neonConfig.glowColor.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 1.5), x: 0, y: 0)
+    }
+
+    @ViewBuilder
+    private func sharpNeon(_ content: Content) -> some View {
+        content
+            .foregroundColor(neonConfig.glowColor)
+            .shadow(color: neonConfig.glowColor.opacity(0.8 * neonConfig.glowIntensity), radius: 1, x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: 2, x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.6 * neonConfig.glowIntensity), radius: 4, x: 0, y: 0)
+    }
+
+    // MARK: - 动态类风格
+
+    @ViewBuilder
+    private func pulseNeon(_ content: Content) -> some View {
+        content
+            .foregroundColor(neonConfig.glowColor)
+            .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+            // 注意：脉冲动画需要在 View 外部使用 animation modifier
+    }
+
+    @ViewBuilder
+    private func flickerNeon(_ content: Content) -> some View {
+        content
+            .foregroundColor(neonConfig.glowColor)
+            .shadow(color: neonConfig.glowColor.opacity(0.6 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.9 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+            // 注意：闪烁动画需要在 View 外部使用 animation modifier
+    }
+
+    @ViewBuilder
+    private func breathingNeon(_ content: Content) -> some View {
+        content
+            .foregroundColor(neonConfig.glowColor)
+            .shadow(color: neonConfig.glowColor.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.4), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.8), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+            // 注意：呼吸动画需要在 View 外部使用 animation modifier
+    }
+
+    // MARK: - 特效类风格
+
+    @ViewBuilder
+    private func glitchNeon(_ content: Content) -> some View {
+        ZStack {
+            // 红色偏移层
+            content
+                .foregroundColor(.red.opacity(0.7))
+                .offset(x: CGFloat(neonConfig.glitchIntensity * 3), y: 0)
+
+            // 青色偏移层
+            content
+                .foregroundColor(.cyan.opacity(0.7))
+                .offset(x: CGFloat(-neonConfig.glitchIntensity * 3), y: 0)
+
+            // 主发光层
+            basicNeon(content)
+        }
+    }
+
+    @ViewBuilder
+    private func gradientNeon(_ content: Content) -> some View {
+        let endColor = neonConfig.gradientEndColor ?? neonConfig.glowColor.opacity(0.5)
+        content
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [neonConfig.glowColor, endColor, neonConfig.glowColor],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+    }
+
+    @ViewBuilder
+    private func rainbowNeon(_ content: Content) -> some View {
+        content
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [.red, .orange, .yellow, .green, .blue, .purple, .pink],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .shadow(color: .white.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
+            .shadow(color: .purple.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
+            .shadow(color: .blue.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+    }
+
+    // MARK: - 高级类风格
+
+    @ViewBuilder
+    private func cyberpunkNeon(_ content: Content) -> some View {
+        ZStack {
+            // 外层紫色发光
+            content
+                .foregroundColor(.purple.opacity(0.3))
+                .shadow(color: .purple.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 1.5), x: 0, y: 0)
+
+            // 中层青色发光
+            content
+                .foregroundColor(.cyan)
+                .shadow(color: .cyan.opacity(0.6 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+
+            // 内层粉色发光
+            content
+                .foregroundColor(.pink)
+                .shadow(color: .pink.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func retroNeon(_ content: Content) -> some View {
+        ZStack {
+            // 暗红色底层
+            content
+                .foregroundColor(.red.opacity(0.3))
+                .offset(x: 2, y: 2)
+
+            // 橙色中间层
+            content
+                .foregroundColor(.orange.opacity(0.6))
+                .shadow(color: .orange.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
+
+            // 黄色主层
+            content
+                .foregroundColor(.yellow)
+                .shadow(color: .yellow.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+        }
+    }
+
+    // MARK: - 自定义风格
+
+    @ViewBuilder
+    private func customNeon(_ content: Content) -> some View {
+        var modifiedContent = content
+            .foregroundColor(neonConfig.glowColor)
+
+        // 基础发光
+        modifiedContent = modifiedContent
+            .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
+            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+
+        // 多层发光
+        if neonConfig.enableMultipleLayers, let secondaryColor = neonConfig.secondaryGlowColor {
+            modifiedContent = modifiedContent
+                .shadow(color: secondaryColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.secondaryGlowRadius * 0.5), x: 0, y: 0)
+                .shadow(color: secondaryColor.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.secondaryGlowRadius), x: 0, y: 0)
+        }
+
+        // 渐变效果
+        if let gradientEnd = neonConfig.gradientEndColor {
+            modifiedContent = content
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [neonConfig.glowColor, gradientEnd],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
+                .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
+                .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
+        }
+
+        modifiedContent
+    }
+}
+
 // MARK: - 预览
 struct BannerDisplayView_Previews: PreviewProvider {
     static var previews: some View {

@@ -102,11 +102,17 @@ struct ContentView: View {
                             // 文字设置
                             textSettingsSection
 
+                            // 艺术字样式 (新增)
+                            artisticStyleSection
+
                             // 颜色设置
                             colorSettingsSection
 
                             // 动画设置
                             animationSettingsSection
+
+                            // 动效参数 (新增)
+                            animationConfigSection
 
                             // 背景设置
                             backgroundSettingsSection
@@ -520,6 +526,246 @@ struct ContentView: View {
             .foregroundColor(bannerStyle.fontStyle == style ? .white : .primary)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - 艺术字样式区域
+    private var artisticStyleSection: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("艺术字样式")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Spacer()
+                if !subscriptionManager.isSubscribed {
+                    Image(systemName: "crown.fill")
+                        .font(.caption)
+                        .foregroundColor(.yellow)
+                }
+            }
+
+            // 风格选择网格
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 8) {
+                ForEach(ArtisticStyle.allCases, id: \.self) { style in
+                    artisticStyleButton(style)
+                }
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.platformSecondaryBackground)
+        )
+    }
+
+    private func artisticStyleButton(_ style: ArtisticStyle) -> some View {
+        let isSelected = bannerStyle.artisticStyle == style
+        let isLocked = style.isPremium && !subscriptionManager.isSubscribed
+
+        return Button {
+            if isLocked {
+                premiumFeatureName = "艺术字样式"
+                premiumFeatureDescription = "解锁 \(style.displayName) 等高级艺术字风格"
+                showingPremiumUpgrade = true
+            } else {
+                bannerStyle.artisticStyle = style
+            }
+        } label: {
+            VStack(spacing: 2) {
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10))
+                }
+                Text(style.displayName)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isSelected ? Color.accentColor : Color.clear)
+            )
+            .foregroundColor(isSelected ? .white : (isLocked ? .secondary : .primary))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - 动效参数区域
+    private var animationConfigSection: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("动效参数")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Spacer()
+                if !subscriptionManager.isSubscribed {
+                    Image(systemName: "crown.fill")
+                        .font(.caption)
+                        .foregroundColor(.yellow)
+                }
+            }
+
+            if subscriptionManager.isSubscribed {
+                // 根据动效类型显示参数
+                animationConfigControls
+            } else {
+                // 未订阅提示
+                Button {
+                    premiumFeatureName = "动效参数"
+                    premiumFeatureDescription = "调整动效参数，打造个性化效果"
+                    showingPremiumUpgrade = true
+                } label: {
+                    HStack {
+                        Image(systemName: "crown.fill")
+                            .foregroundColor(.yellow)
+                        Text("订阅解锁动效参数调整")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.gray.opacity(0.3), style: .init(lineWidth: 1, dash: [4]))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.platformSecondaryBackground)
+        )
+    }
+
+    @ViewBuilder
+    private var animationConfigControls: some View {
+        switch bannerStyle.animationType {
+        case .blink:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("闪烁频率")
+                        .font(.caption)
+                    Spacer()
+                    Text("\(String(format: "%.1f", bannerStyle.blinkConfig?.frequency ?? 1.0))次/秒")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.blinkConfig?.frequency ?? 1.0 },
+                        set: { bannerStyle.blinkConfig = (bannerStyle.blinkConfig ?? .default); bannerStyle.blinkConfig?.frequency = $0 }
+                    ),
+                    in: 0.5...3.0,
+                    step: 0.1
+                )
+            }
+        case .breathing:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("呼吸幅度")
+                        .font(.caption)
+                    Spacer()
+                    Text("\(Int((bannerStyle.breathingConfig?.maxScale ?? 1.2) * 100))%")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.breathingConfig?.maxScale ?? 1.2 },
+                        set: { bannerStyle.breathingConfig = (bannerStyle.breathingConfig ?? .default); bannerStyle.breathingConfig?.maxScale = $0 }
+                    ),
+                    in: 1.0...1.5,
+                    step: 0.05
+                )
+            }
+        case .bounce:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("弹跳高度")
+                        .font(.caption)
+                    Spacer()
+                    Text("\(Int(bannerStyle.bounceConfig?.bounceHeight ?? 20))px")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.bounceConfig?.bounceHeight ?? 20 },
+                        set: { bannerStyle.bounceConfig = (bannerStyle.bounceConfig ?? .default); bannerStyle.bounceConfig?.bounceHeight = $0 }
+                    ),
+                    in: 5...50,
+                    step: 1
+                )
+            }
+        case .particles:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("粒子数量")
+                        .font(.caption)
+                    Spacer()
+                    Text("\(bannerStyle.particlesConfig?.particleCount ?? 30)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { Double(bannerStyle.particlesConfig?.particleCount ?? 30) },
+                        set: { bannerStyle.particlesConfig = (bannerStyle.particlesConfig ?? .default); bannerStyle.particlesConfig?.particleCount = Int($0) }
+                    ),
+                    in: 10...100,
+                    step: 5
+                )
+            }
+        case .wave:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("波浪振幅")
+                        .font(.caption)
+                    Spacer()
+                    Text("\(Int(bannerStyle.waveConfig?.amplitude ?? 15))px")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.waveConfig?.amplitude ?? 15 },
+                        set: { bannerStyle.waveConfig = (bannerStyle.waveConfig ?? .default); bannerStyle.waveConfig?.amplitude = $0 }
+                    ),
+                    in: 5...30,
+                    step: 1
+                )
+            }
+        case .led:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("发光强度")
+                        .font(.caption)
+                    Spacer()
+                    Text("\(Int((bannerStyle.ledConfig?.glowIntensity ?? 0.5) * 100))%")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { bannerStyle.ledConfig?.glowIntensity ?? 0.5 },
+                        set: { bannerStyle.ledConfig = (bannerStyle.ledConfig ?? .default); bannerStyle.ledConfig?.glowIntensity = $0 }
+                    ),
+                    in: 0...1,
+                    step: 0.1
+                )
+            }
+        default:
+            Text("该动效暂无可调参数")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
     }
 
     // MARK: - 颜色设置区域

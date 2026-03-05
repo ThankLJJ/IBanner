@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1772517209414,
+  "lastScanned": 1772606514623,
   "projectRoot": "/Users/l/Projects/Apple/Thank_L",
   "techStack": {
     "languages": [],
@@ -24,7 +24,9 @@
   "structure": {
     "isMonorepo": false,
     "workspaces": [],
-    "mainDirectories": [],
+    "mainDirectories": [
+      "docs"
+    ],
     "gitBranches": null
   },
   "customNotes": [],
@@ -33,7 +35,7 @@
       "path": "Thank_L",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1772517209392,
+      "lastAccessed": 1772606514600,
       "keyFiles": [
         "Thank_LApp.swift"
       ]
@@ -42,7 +44,7 @@
       "path": "Thank_L.xcodeproj",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1772517209394,
+      "lastAccessed": 1772606514603,
       "keyFiles": [
         "project.pbxproj"
       ]
@@ -51,7 +53,7 @@
       "path": "Thank_LTests",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1772517209396,
+      "lastAccessed": 1772606514604,
       "keyFiles": [
         "Thank_LTests.swift"
       ]
@@ -60,17 +62,24 @@
       "path": "Thank_LUITests",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1772517209397,
+      "lastAccessed": 1772606514604,
       "keyFiles": [
         "Thank_LUITests.swift",
         "Thank_LUITestsLaunchTests.swift"
       ]
     },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1772606514605,
+      "keyFiles": []
+    },
     "Thank_L/Models": {
       "path": "Thank_L/Models",
       "purpose": "Data models",
       "fileCount": 1,
-      "lastAccessed": 1772517209397,
+      "lastAccessed": 1772606514606,
       "keyFiles": [
         "BannerModels.swift"
       ]
@@ -79,7 +88,7 @@
       "path": "Thank_L/Utils",
       "purpose": "Utility functions",
       "fileCount": 1,
-      "lastAccessed": 1772517209397,
+      "lastAccessed": 1772606514607,
       "keyFiles": [
         "Localizable.swift"
       ]
@@ -88,7 +97,7 @@
       "path": "Thank_L/Views",
       "purpose": "View templates",
       "fileCount": 7,
-      "lastAccessed": 1772517209397,
+      "lastAccessed": 1772606514607,
       "keyFiles": [
         "BannerDisplayView.swift",
         "ContentView.swift",
@@ -98,46 +107,52 @@
   },
   "hotPaths": [
     {
-      "path": "Thank_L/Views/ContentView.swift",
-      "accessCount": 85,
-      "lastAccessed": 1772593121724,
-      "type": "file"
-    },
-    {
       "path": "Thank_L/Views/StyleSettingsView.swift",
-      "accessCount": 21,
-      "lastAccessed": 1772520308447,
-      "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 13,
-      "lastAccessed": 1772517602374,
-      "type": "directory"
-    },
-    {
-      "path": "Thank_L/Views/BannerDisplayView.swift",
-      "accessCount": 9,
-      "lastAccessed": 1772518258267,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Views",
-      "accessCount": 4,
-      "lastAccessed": 1772517947244,
-      "type": "directory"
-    },
-    {
-      "path": "Thank_L/Managers/BannerDataManager.swift",
-      "accessCount": 3,
-      "lastAccessed": 1772518348998,
+      "accessCount": 15,
+      "lastAccessed": 1772678290617,
       "type": "file"
     },
     {
       "path": "Thank_L/Models/BannerModels.swift",
-      "accessCount": 1,
-      "lastAccessed": 1772517419761,
+      "accessCount": 8,
+      "lastAccessed": 1772677963016,
+      "type": "directory"
+    },
+    {
+      "path": "docs/plans/2026-03-04-artistic-animation-config-design.md",
+      "accessCount": 7,
+      "lastAccessed": 1772677026465,
       "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplayView.swift",
+      "accessCount": 7,
+      "lastAccessed": 1772678068898,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/ContentView.swift",
+      "accessCount": 6,
+      "lastAccessed": 1772612999154,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 5,
+      "lastAccessed": 1772677973515,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Utils/Localizable.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772606548133,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views",
+      "accessCount": 1,
+      "lastAccessed": 1772677978276,
+      "type": "directory"
     }
   ],
   "userDirectives": []
