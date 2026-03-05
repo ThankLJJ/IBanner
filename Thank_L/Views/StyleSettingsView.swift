@@ -248,7 +248,14 @@ struct StyleSettingsView: View {
                         weight: bannerStyle.isBold ? .bold : .regular
                     ))
                     .foregroundColor(bannerStyle.textColor)
-                    .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                    .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                     .fixedSize()
 
                 Spacer().frame(width: 60)
@@ -259,7 +266,14 @@ struct StyleSettingsView: View {
                         weight: bannerStyle.isBold ? .bold : .regular
                     ))
                     .foregroundColor(bannerStyle.textColor)
-                    .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                    .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                     .fixedSize()
             }
             .offset(x: previewScrollOffset)
@@ -337,10 +351,12 @@ struct StyleSettingsView: View {
                     weight: bannerStyle.isBold ? .bold : .regular
                 ))
                 .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .modifier(ArtisticStyleModifier(
+                .modifier(FontStyleModifier(
+                    fontStyle: bannerStyle.fontStyle,
                     artisticStyle: bannerStyle.artisticStyle,
                     artisticConfig: bannerStyle.artisticConfig,
+                    neonStyle: bannerStyle.neonStyle,
+                    neonConfig: bannerStyle.neonConfig,
                     textColor: bannerStyle.textColor
                 ))
                 .multilineTextAlignment(.center)
@@ -354,8 +370,10 @@ struct StyleSettingsView: View {
                     weight: bannerStyle.isBold ? .bold : .regular
                 ))
                 .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .modifier(NeonStyleModifier(
+                .modifier(FontStyleModifier(
+                    fontStyle: bannerStyle.fontStyle,
+                    artisticStyle: bannerStyle.artisticStyle,
+                    artisticConfig: bannerStyle.artisticConfig,
                     neonStyle: bannerStyle.neonStyle,
                     neonConfig: bannerStyle.neonConfig,
                     textColor: bannerStyle.textColor
@@ -371,7 +389,14 @@ struct StyleSettingsView: View {
                     weight: bannerStyle.isBold ? .bold : .regular
                 ))
                 .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .modifier(FontStyleModifier(
+                    fontStyle: bannerStyle.fontStyle,
+                    artisticStyle: bannerStyle.artisticStyle,
+                    artisticConfig: bannerStyle.artisticConfig,
+                    neonStyle: bannerStyle.neonStyle,
+                    neonConfig: bannerStyle.neonConfig,
+                    textColor: bannerStyle.textColor
+                ))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .padding(.horizontal, 16)
@@ -380,44 +405,20 @@ struct StyleSettingsView: View {
 
     @ViewBuilder
     private func previewCharWithStyle(_ char: String) -> some View {
-        switch bannerStyle.fontStyle {
-        case .artistic:
-            Text(char)
-                .font(.system(
-                    size: min(bannerStyle.fontSize * 0.4, 24),
-                    weight: bannerStyle.isBold ? .bold : .regular
-                ))
-                .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .modifier(ArtisticStyleModifier(
-                    artisticStyle: bannerStyle.artisticStyle,
-                    artisticConfig: bannerStyle.artisticConfig,
-                    textColor: bannerStyle.textColor
-                ))
-
-        case .neon:
-            Text(char)
-                .font(.system(
-                    size: min(bannerStyle.fontSize * 0.4, 24),
-                    weight: bannerStyle.isBold ? .bold : .regular
-                ))
-                .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-                .modifier(NeonStyleModifier(
-                    neonStyle: bannerStyle.neonStyle,
-                    neonConfig: bannerStyle.neonConfig,
-                    textColor: bannerStyle.textColor
-                ))
-
-        case .normal:
-            Text(char)
-                .font(.system(
-                    size: min(bannerStyle.fontSize * 0.4, 24),
-                    weight: bannerStyle.isBold ? .bold : .regular
-                ))
-                .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
-        }
+        Text(char)
+            .font(.system(
+                size: min(bannerStyle.fontSize * 0.4, 24),
+                weight: bannerStyle.isBold ? .bold : .regular
+            ))
+            .foregroundColor(bannerStyle.textColor)
+            .modifier(FontStyleModifier(
+                fontStyle: bannerStyle.fontStyle,
+                artisticStyle: bannerStyle.artisticStyle,
+                artisticConfig: bannerStyle.artisticConfig,
+                neonStyle: bannerStyle.neonStyle,
+                neonConfig: bannerStyle.neonConfig,
+                textColor: bannerStyle.textColor
+            ))
     }
 
     // MARK: - 预览动画控制

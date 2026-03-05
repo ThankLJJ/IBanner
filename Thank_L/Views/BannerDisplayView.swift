@@ -303,7 +303,14 @@ struct BannerDisplayView: View {
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
             .padding(.horizontal, adaptivePadding)
-            .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+            .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
     }
     
     // MARK: - 滚动文本视图
@@ -320,7 +327,14 @@ struct BannerDisplayView: View {
                             weight: bannerStyle.isBold ? .bold : .regular
                         ))
                         .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                        .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                         .fixedSize()
 
                     // 间距
@@ -334,7 +348,14 @@ struct BannerDisplayView: View {
                             weight: bannerStyle.isBold ? .bold : .regular
                         ))
                         .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                        .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                         .fixedSize()
                 }
                 .offset(x: scrollOffset)
@@ -354,7 +375,14 @@ struct BannerDisplayView: View {
                             weight: bannerStyle.isBold ? .bold : .regular
                         ))
                         .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                        .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                         .fixedSize()
 
                     // 间距
@@ -368,7 +396,14 @@ struct BannerDisplayView: View {
                             weight: bannerStyle.isBold ? .bold : .regular
                         ))
                         .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                        .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                         .fixedSize()
                 }
                 .offset(y: scrollOffset)
@@ -389,7 +424,14 @@ struct BannerDisplayView: View {
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
-            .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+            .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
@@ -410,7 +452,14 @@ struct BannerDisplayView: View {
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
-            .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+            .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
@@ -432,7 +481,14 @@ struct BannerDisplayView: View {
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
-            .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+            .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
@@ -453,7 +509,14 @@ struct BannerDisplayView: View {
                             weight: bannerStyle.isBold ? .bold : .regular
                         ))
                         .foregroundColor(bannerStyle.textColor)
-                        .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                        .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                         .opacity(randomFlashOpacities[index])
                         .position(randomFlashPositions[index])
                         .scaleEffect(randomFlashOpacities[index])
@@ -476,7 +539,14 @@ struct BannerDisplayView: View {
                         weight: bannerStyle.isBold ? .bold : .regular
                     ))
                     .foregroundColor(bannerStyle.textColor)
-                    .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                    .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                     .offset(y: sin(wavePhase + CGFloat(index) * 0.5) * 15)
             }
         }
@@ -496,7 +566,14 @@ struct BannerDisplayView: View {
                 weight: bannerStyle.isBold ? .bold : .regular
             ))
             .foregroundColor(bannerStyle.textColor)
-            .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+            .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
             .multilineTextAlignment(.center)
             .lineLimit(nil)
             .minimumScaleFactor(0.5)
@@ -527,7 +604,14 @@ struct BannerDisplayView: View {
                     weight: bannerStyle.isBold ? .bold : .regular
                 ))
                 .foregroundColor(bannerStyle.textColor)
-                .modifier(FontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+                .modifier(FontStyleModifier(
+                        fontStyle: bannerStyle.fontStyle,
+                        artisticStyle: bannerStyle.artisticStyle,
+                        artisticConfig: bannerStyle.artisticConfig,
+                        neonStyle: bannerStyle.neonStyle,
+                        neonConfig: bannerStyle.neonConfig,
+                        textColor: bannerStyle.textColor
+                    ))
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
                 .minimumScaleFactor(0.5)
@@ -897,6 +981,10 @@ struct Particle: Identifiable {
 // MARK: - 字体样式修饰符
 struct FontStyleModifier: ViewModifier {
     let fontStyle: FontStyle
+    let artisticStyle: ArtisticStyle
+    let artisticConfig: ArtisticStyleConfig
+    let neonStyle: NeonStyle
+    let neonConfig: NeonStyleConfig
     let textColor: Color
 
     func body(content: Content) -> some View {
@@ -905,32 +993,22 @@ struct FontStyleModifier: ViewModifier {
             content
 
         case .artistic:
-            // 艺术字：渐变文字效果 + 立体阴影
-            ZStack {
-                // 底层阴影
-                content
-                    .foregroundColor(textColor.opacity(0.3))
-                    .offset(x: 2, y: 2)
-                // 渐变文字
-                content
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.white, textColor, textColor.opacity(0.8), .white],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            }
+            // 艺术字：使用 ArtisticStyleModifier 应用具体风格
+            content
+                .modifier(ArtisticStyleModifier(
+                    artisticStyle: artisticStyle,
+                    artisticConfig: artisticConfig,
+                    textColor: textColor
+                ))
 
         case .neon:
-            // 霓虹灯效果：多层发光
+            // 霓虹字：使用 NeonStyleModifier 应用具体风格
             content
-                .foregroundColor(textColor)
-                .shadow(color: textColor.opacity(0.5), radius: 1, x: 0, y: 0)
-                .shadow(color: textColor.opacity(0.6), radius: 3, x: 0, y: 0)
-                .shadow(color: textColor.opacity(0.7), radius: 6, x: 0, y: 0)
-                .shadow(color: textColor.opacity(0.8), radius: 12, x: 0, y: 0)
-                .shadow(color: textColor, radius: 20, x: 0, y: 0)
+                .modifier(NeonStyleModifier(
+                    neonStyle: neonStyle,
+                    neonConfig: neonConfig,
+                    textColor: textColor
+                ))
         }
     }
 }

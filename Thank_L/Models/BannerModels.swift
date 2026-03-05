@@ -624,6 +624,24 @@ extension Color {
         return Color.gray.opacity(0.1)
         #endif
     }
+
+    /// 跨平台分组背景颜色
+    static var platformGroupedBackground: Color {
+        #if os(iOS)
+        return Color(UIColor.systemGroupedBackground)
+        #else
+        return Color(NSColor.windowBackgroundColor)
+        #endif
+    }
+
+    /// 跨平台二级分组背景颜色
+    static var platformSecondaryGroupedBackground: Color {
+        #if os(iOS)
+        return Color(UIColor.secondarySystemGroupedBackground)
+        #else
+        return Color(NSColor.controlBackgroundColor)
+        #endif
+    }
 }
 
 // MARK: - 横幅模板

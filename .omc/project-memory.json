@@ -108,33 +108,39 @@
   "hotPaths": [
     {
       "path": "Thank_L/Views/StyleSettingsView.swift",
-      "accessCount": 15,
-      "lastAccessed": 1772678290617,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Views/BannerDisplayView.swift",
-      "accessCount": 10,
-      "lastAccessed": 1772678605628,
-      "type": "file"
-    },
-    {
-      "path": "Thank_L/Models/BannerModels.swift",
-      "accessCount": 9,
-      "lastAccessed": 1772678613349,
-      "type": "directory"
-    },
-    {
-      "path": "docs/plans/2026-03-04-artistic-animation-config-design.md",
-      "accessCount": 7,
-      "lastAccessed": 1772677026465,
+      "accessCount": 35,
+      "lastAccessed": 1772681121302,
       "type": "file"
     },
     {
       "path": "Thank_L/Views/ContentView.swift",
-      "accessCount": 6,
-      "lastAccessed": 1772612999154,
+      "accessCount": 24,
+      "lastAccessed": 1772680699878,
       "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplayView.swift",
+      "accessCount": 21,
+      "lastAccessed": 1772680861796,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Models/BannerModels.swift",
+      "accessCount": 11,
+      "lastAccessed": 1772680538797,
+      "type": "directory"
+    },
+    {
+      "path": "docs/plans/2026-03-04-artistic-animation-config-design.md",
+      "accessCount": 8,
+      "lastAccessed": 1772680048018,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views",
+      "accessCount": 6,
+      "lastAccessed": 1772681077215,
+      "type": "directory"
     },
     {
       "path": "",
@@ -143,15 +149,45 @@
       "type": "directory"
     },
     {
-      "path": "Thank_L/Utils/Localizable.swift",
-      "accessCount": 1,
-      "lastAccessed": 1772606548133,
+      "path": "CLAUDE.md",
+      "accessCount": 5,
+      "lastAccessed": 1772679440673,
       "type": "file"
     },
     {
-      "path": "Thank_L/Views",
+      "path": "Thank_L/Utils/Localizable.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772679315764,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
       "accessCount": 1,
-      "lastAccessed": 1772677978276,
+      "lastAccessed": 1772679300820,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Thank_LApp.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772679306358,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Managers/BannerDataManager.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772679306403,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Managers/SubscriptionManager.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772679315767,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L",
+      "accessCount": 1,
+      "lastAccessed": 1772681109636,
       "type": "directory"
     }
   ],

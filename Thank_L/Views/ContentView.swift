@@ -84,7 +84,7 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 // 纯净背景
-                Color.platformBackground
+                Color.platformGroupedBackground
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
@@ -102,8 +102,15 @@ struct ContentView: View {
                             // 文字设置
                             textSettingsSection
 
-                            // 艺术字样式 (新增)
-                            artisticStyleSection
+                            // 艺术字样式 (仅当字体样式为艺术字时显示)
+                            if bannerStyle.fontStyle == .artistic {
+                                artisticStyleSection
+                            }
+
+                            // 霓虹字样式 (仅当字体样式为霓虹字时显示)
+                            if bannerStyle.fontStyle == .neon {
+                                neonStyleSection
+                            }
 
                             // 颜色设置
                             colorSettingsSection
@@ -263,9 +270,13 @@ struct ContentView: View {
             // 文字
             animatedText
         }
-        .frame(height: 120)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.12), radius: 10, y: 5)
+        .frame(height: 140)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        )
         .onAppear { startAnimation() }
         .onChange(of: bannerStyle.animationType) { _, _ in restartAnimation() }
         .onChange(of: bannerStyle.animationSpeed) { _, _ in restartAnimation() }
@@ -401,7 +412,14 @@ struct ContentView: View {
             .multilineTextAlignment(.center)
             .lineLimit(2)
             .padding(.horizontal, 24)
-            .modifier(PreviewFontStyleModifier(fontStyle: bannerStyle.fontStyle, textColor: bannerStyle.textColor))
+            .modifier(PreviewFontStyleModifier(
+                    fontStyle: bannerStyle.fontStyle,
+                    artisticStyle: bannerStyle.artisticStyle,
+                    artisticConfig: bannerStyle.artisticConfig,
+                    neonStyle: bannerStyle.neonStyle,
+                    neonConfig: bannerStyle.neonConfig,
+                    textColor: bannerStyle.textColor
+                ))
     }
 
     private func font() -> Font {
@@ -413,38 +431,41 @@ struct ContentView: View {
 
     // MARK: - 输入区
     private var inputArea: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(L10n.Content.content)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+        SettingsCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.Content.content)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
 
-            TextEditor(text: $bannerStyle.text)
-                .font(.system(size: 16))
-                .frame(height: 80)
-                .padding(2)
-                .background(Color.platformSecondaryBackground)
-                .cornerRadius(10)
-                .focused($isInputFocused)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isInputFocused ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 2)
-                )
-                .overlay(alignment: .topLeading) {
-                    if bannerStyle.text.isEmpty {
-                        Text(L10n.Content.inputPlaceholder)
-                            .font(.system(size: 17))
-                            .foregroundStyle(.tertiary)
-                            .padding(16)
-                            .allowsHitTesting(false)
+                TextEditor(text: $bannerStyle.text)
+                    .font(.system(size: 18))
+                    .frame(height: 100)
+                    .scrollContentBackground(.hidden)
+                    .padding(8)
+                    .background(Color.platformSystemGray6)
+                    .cornerRadius(12)
+                    .focused($isInputFocused)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(isInputFocused ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 2)
+                    )
+                    .overlay(alignment: .topLeading) {
+                        if bannerStyle.text.isEmpty {
+                            Text(L10n.Content.inputPlaceholder)
+                                .font(.system(size: 18))
+                                .foregroundStyle(.tertiary)
+                                .padding(12)
+                                .allowsHitTesting(false)
+                        }
                     }
-                }
+            }
         }
     }
 
     // MARK: - 文字设置区域
     private var textSettingsSection: some View {
-        VStack(spacing: 12) {
+        SettingsCard {
             // 字体大小
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -487,11 +508,6 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     private func fontStyleButton(_ style: FontStyle) -> some View {
@@ -530,7 +546,7 @@ struct ContentView: View {
 
     // MARK: - 艺术字样式区域
     private var artisticStyleSection: some View {
-        VStack(spacing: 12) {
+        SettingsCard {
             HStack {
                 Text("艺术字样式")
                     .font(.subheadline)
@@ -550,11 +566,6 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     private func artisticStyleButton(_ style: ArtisticStyle) -> some View {
@@ -594,9 +605,70 @@ struct ContentView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - 霓虹字样式区域
+    private var neonStyleSection: some View {
+        SettingsCard {
+            HStack {
+                Text("霓虹字样式")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Spacer()
+                if !subscriptionManager.isSubscribed {
+                    Image(systemName: "crown.fill")
+                        .font(.caption)
+                        .foregroundColor(.yellow)
+                }
+            }
+
+            // 风格选择网格
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 8) {
+                ForEach(NeonStyle.allCases, id: \.self) { style in
+                    neonStyleButton(style)
+                }
+            }
+        }
+    }
+
+    private func neonStyleButton(_ style: NeonStyle) -> some View {
+        let isSelected = bannerStyle.neonStyle == style
+        let isLocked = style.isPremium && !subscriptionManager.isSubscribed
+
+        return Button {
+            if isLocked {
+                premiumFeatureName = "霓虹字样式"
+                premiumFeatureDescription = "解锁 \(style.displayName) 等高级霓虹字风格"
+                showingPremiumUpgrade = true
+            } else {
+                bannerStyle.neonStyle = style
+            }
+        } label: {
+            VStack(spacing: 2) {
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10))
+                }
+                Text(style.displayName)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isSelected ? Color.accentColor : Color.clear)
+            )
+            .foregroundColor(isSelected ? .white : (isLocked ? .secondary : .primary))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - 动效参数区域
     private var animationConfigSection: some View {
-        VStack(spacing: 12) {
+        SettingsCard {
             HStack {
                 Text("动效参数")
                     .font(.subheadline)
@@ -636,11 +708,6 @@ struct ContentView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     @ViewBuilder
@@ -770,7 +837,7 @@ struct ContentView: View {
 
     // MARK: - 颜色设置区域
     private var colorSettingsSection: some View {
-        VStack(spacing: 12) {
+        SettingsCard {
             // 文字颜色
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.textColor)
@@ -809,11 +876,6 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     private func colorButton(color: Color, isSelected: Bool, action: @escaping () -> Void) -> some View {
@@ -870,7 +932,7 @@ struct ContentView: View {
 
     // MARK: - 动画设置区域
     private var animationSettingsSection: some View {
-        VStack(spacing: 12) {
+        SettingsCard {
             // 动画类型
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.animationType)
@@ -905,11 +967,6 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     private func animChip(_ anim: AnimationType) -> some View {
@@ -968,7 +1025,7 @@ struct ContentView: View {
 
     // MARK: - 背景设置区域
     private var backgroundSettingsSection: some View {
-        VStack(spacing: 12) {
+        SettingsCard {
             // 背景图片上传区域
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.StyleSettings.backgroundImage)
@@ -1112,11 +1169,6 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     private func backgroundTypeButton(_ type: BackgroundType) -> some View {
@@ -1142,27 +1194,24 @@ struct ContentView: View {
 
     // MARK: - 预设样式区域
     private var presetStylesSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(L10n.StyleSettings.presetStyles)
-                .font(.subheadline)
-                .fontWeight(.medium)
+        SettingsCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.StyleSettings.presetStyles)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    presetStyleChip(L10n.PresetStyle.concert, .red, .white, .blink)
-                    presetStyleChip(L10n.PresetStyle.birthday, .pink, .white, .gradient)
-                    presetStyleChip(L10n.PresetStyle.pickup, .white, .black, .none)
-                    presetStyleChip(L10n.PresetStyle.driver, .blue, .white, .breathing)
-                    presetStyleChip(L10n.PresetStyle.thanks, .green, .white, .none)
-                    presetStyleChip(L10n.PresetStyle.wait, .yellow, .black, .blink)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        presetStyleChip(L10n.PresetStyle.concert, .red, .white, .blink)
+                        presetStyleChip(L10n.PresetStyle.birthday, .pink, .white, .gradient)
+                        presetStyleChip(L10n.PresetStyle.pickup, .white, .black, .none)
+                        presetStyleChip(L10n.PresetStyle.driver, .blue, .white, .breathing)
+                        presetStyleChip(L10n.PresetStyle.thanks, .green, .white, .none)
+                        presetStyleChip(L10n.PresetStyle.wait, .yellow, .black, .blink)
+                    }
                 }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.platformSecondaryBackground)
-        )
     }
 
     private func presetStyleChip(_ name: String, _ bgColor: Color, _ textColor: Color, _ animation: AnimationType) -> some View {
@@ -1533,6 +1582,23 @@ struct ContentView: View {
     }
 }
 
+// MARK: - 通用设置卡片组件
+struct SettingsCard<Content: View>: View {
+    @ViewBuilder let content: Content
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            content
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.platformSecondaryGroupedBackground)
+                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
+    }
+}
+
 // MARK: - 粒子数据
 struct ParticleData: Identifiable {
     let id = UUID()
@@ -1545,6 +1611,10 @@ struct ParticleData: Identifiable {
 // MARK: - 预览字体样式修饰符
 struct PreviewFontStyleModifier: ViewModifier {
     let fontStyle: FontStyle
+    let artisticStyle: ArtisticStyle
+    let artisticConfig: ArtisticStyleConfig
+    let neonStyle: NeonStyle
+    let neonConfig: NeonStyleConfig
     let textColor: Color
 
     func body(content: Content) -> some View {
@@ -1553,32 +1623,22 @@ struct PreviewFontStyleModifier: ViewModifier {
             content
 
         case .artistic:
-            // 艺术字：渐变文字效果 + 立体阴影
-            ZStack {
-                // 底层阴影
-                content
-                    .foregroundColor(textColor.opacity(0.3))
-                    .offset(x: 2, y: 2)
-                // 渐变文字
-                content
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.white, textColor, textColor.opacity(0.8), .white],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            }
+            // 艺术字：使用 ArtisticStyleModifier 应用具体风格
+            content
+                .modifier(ArtisticStyleModifier(
+                    artisticStyle: artisticStyle,
+                    artisticConfig: artisticConfig,
+                    textColor: textColor
+                ))
 
         case .neon:
-            // 霓虹灯效果：多层发光
+            // 霓虹字：使用 NeonStyleModifier 应用具体风格
             content
-                .foregroundColor(textColor)
-                .shadow(color: textColor.opacity(0.5), radius: 1, x: 0, y: 0)
-                .shadow(color: textColor.opacity(0.6), radius: 3, x: 0, y: 0)
-                .shadow(color: textColor.opacity(0.7), radius: 6, x: 0, y: 0)
-                .shadow(color: textColor.opacity(0.8), radius: 12, x: 0, y: 0)
-                .shadow(color: textColor, radius: 20, x: 0, y: 0)
+                .modifier(NeonStyleModifier(
+                    neonStyle: neonStyle,
+                    neonConfig: neonConfig,
+                    textColor: textColor
+                ))
         }
     }
 }
