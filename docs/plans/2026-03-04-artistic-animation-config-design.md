@@ -1,6 +1,7 @@
 # 艺术字与动效样式配置设计文档
 
 > 创建日期: 2026-03-04
+> 更新日期: 2026-03-05
 > 状态: 待实现
 
 ## 概述
@@ -74,9 +75,107 @@ struct ArtisticStyleConfig: Codable {
 }
 ```
 
-### 1.3 权限控制
+### 1.4 权限控制
 
 - `none` (普通) 样式：免费
+- 其他所有预设风格：需订阅
+- `custom` 自定义参数：需订阅
+
+---
+
+## 一（补）、霓虹字样式配置
+
+### 1.N.1 预设风格枚举
+
+按效果类型分类：
+
+```swift
+enum NeonStyle: String, CaseIterable, Codable {
+    // 基础类
+    case basic = "基础发光"
+    case soft = "柔和光晕"
+    case sharp = "锐利光芒"
+
+    // 动态类
+    case pulse = "脉冲"
+    case flicker = "闪烁"
+    case breathing = "呼吸"
+
+    // 特效类
+    case glitch = "故障"
+    case gradient = "渐变"
+    case rainbow = "彩虹"
+
+    // 高级类
+    case cyberpunk = "赛博朋克"
+    case retro = "复古霓虹"
+    case custom = "自定义"
+
+    /// 风格分类
+    enum Category: String, CaseIterable {
+        case basic = "基础"
+        case dynamic = "动态"
+        case effect = "特效"
+        case advanced = "高级"
+
+        var displayName: String { self.rawValue }
+    }
+
+    /// 获取风格所属分类
+    var category: Category? {
+        switch self {
+        case .basic, .soft, .sharp:
+            return .basic
+        case .pulse, .flicker, .breathing:
+            return .dynamic
+        case .glitch, .gradient, .rainbow:
+            return .effect
+        case .cyberpunk, .retro, .custom:
+            return .advanced
+        }
+    }
+
+    /// 是否为高级风格（需要订阅）
+    var isPremium: Bool {
+        return self != .basic
+    }
+}
+```
+
+### 1.N.2 自定义参数配置
+
+完整霓虹系统参数：
+
+```swift
+struct NeonStyleConfig: Codable {
+    // === 基础层 ===
+    var glowColor: Color = .cyan           // 主发光颜色
+    var glowRadius: CGFloat = 10           // 发光半径 (0-50)
+    var glowIntensity: Double = 1.0        // 发光强度 (0-2)
+
+    // === 进阶层 - 多层发光 ===
+    var secondaryGlowColor: Color? = nil   // 次级发光颜色
+    var secondaryGlowRadius: CGFloat = 20  // 次级发光半径 (0-80)
+    var enableMultipleLayers: Bool = false // 是否启用多层发光
+
+    // === 动态效果 ===
+    var pulseSpeed: Double = 1.0           // 脉冲速度 (0.5-3)
+    var flickerFrequency: Double = 2.0     // 闪烁频率 (0.5-5)
+    var breathingRange: Double = 0.3       // 呼吸范围 (0.1-0.5)
+
+    // === 特效 ===
+    var glitchIntensity: Double = 0        // 故障强度 (0-1)
+    var gradientEndColor: Color? = nil     // 渐变结束色
+    var rainbowSpeed: Double = 1.0         // 彩虹速度 (0.5-3)
+
+    /// 默认配置
+    static let `default` = NeonStyleConfig()
+}
+```
+
+### 1.N.3 权限控制
+
+- `basic` (基础发光) 样式：免费
 - 其他所有预设风格：需订阅
 - `custom` 自定义参数：需订阅
 
@@ -238,6 +337,10 @@ struct BannerStyle: Codable {
     var artisticStyle: ArtisticStyle = .none
     var artisticConfig: ArtisticStyleConfig = .init()
 
+    // === 新增：霓虹字配置 ===
+    var neonStyle: NeonStyle = .basic
+    var neonConfig: NeonStyleConfig = .default
+
     // === 新增：动效专属配置 ===
     var scrollConfig: ScrollAnimationConfig?
     var blinkConfig: BlinkAnimationConfig?
@@ -262,40 +365,91 @@ struct BannerStyle: Codable {
 
 ## 四、UI 界面设计
 
-### 4.1 StyleSettingsView 新增区域
+### 4.1 StyleSettingsView 布局结构
+
+**条件显示逻辑：** 样式配置区域根据 `fontStyle` 条件显示
 
 ```
 ┌─────────────────────────────────────┐
 │  ← 样式设置                          │
 ├─────────────────────────────────────┤
-│  [现有区域：文字、颜色、背景等]         │
+│  [预览区域]                          │
 ├─────────────────────────────────────┤
-│  ▼ 艺术字样式 (新增)                  │
+│  [文字设置：字体大小、粗体]           │
+│  [字体样式选择：普通 | 艺术字 | 霓虹字] │
+├─────────────────────────────────────┤
+│  ▼ 字体样式配置 (条件显示)            │
 │  ┌─────────────────────────────────┐│
-│  │ 预设风格: [普通 | 艺术字 ▼]       ││
+│  │ fontStyle == .artistic 时显示:   ││
+│  │   艺术字样式区域                  ││
+│  │   ├─ 材质类: 金属 玻璃 木纹 石头  ││
+│  │   ├─ 氛围类: 火焰 冰霜 电流 烟雾  ││
+│  │   ├─ 风格类: 复古 赛博朋克 卡通...││
+│  │   └─ 自定义参数面板               ││
 │  │                                 ││
-│  │ 当选择"艺术字"时展开：            ││
-│  │ ○ 金属  ○ 玻璃  ○ 火焰          ││
-│  │ ○ 冰霜  ○ 赛博朋克  ○ 卡通       ││
-│  │ ○ 复古  ...  ○ 自定义           ││
+│  │ fontStyle == .neon 时显示:       ││
+│  │   霓虹字样式区域                  ││
+│  │   ├─ 基础类: 基础发光 柔和光晕... ││
+│  │   ├─ 动态类: 脉冲 闪烁 呼吸       ││
+│  │   ├─ 特效类: 故障 渐变 彩虹       ││
+│  │   ├─ 高级类: 赛博朋克 复古霓虹... ││
+│  │   └─ 自定义参数面板               ││
 │  │                                 ││
-│  │ 当选择"自定义"时展开参数面板：     ││
-│  │ └─ 描边、阴影、渐变、发光...      ││
+│  │ fontStyle == .normal 时:        ││
+│  │   不显示任何样式配置区域           ││
 │  └─────────────────────────────────┘│
 ├─────────────────────────────────────┤
-│  ▼ 动效参数 (新增，订阅标识)          │
+│  [颜色设置]                          │
+│  [背景设置]                          │
+│  [动画设置]                          │
+├─────────────────────────────────────┤
+│  ▼ 动效参数 (订阅标识)               │
 │  ┌─────────────────────────────────┐│
-│  │ 动效类型: [滚动 ▼]               ││
-│  │                                 ││
-│  │ 滚动专属参数 (👇需订阅):          ││
-│  │ ├─ 方向: [← → ▼]                ││
-│  │ ├─ 起始位置: ────●──── 0%       ││
-│  │ └─ 中间暂停: [开关]              ││
-│  │                                 ││
-│  │ 切换动效类型时，显示对应参数       ││
+│  │ 根据动效类型显示对应参数控件       ││
 │  └─────────────────────────────────┘│
 └─────────────────────────────────────┘
 ```
+
+### 4.2 预览块改进
+
+**预览块实时展示所有效果：**
+
+1. **动效参数应用** - 预览动画读取 Config 参数
+   ```swift
+   // 闪烁效果 - 使用配置参数
+   case .blink:
+       let minOpacity = bannerStyle.blinkConfig?.minOpacity ?? 0.3
+       let frequency = bannerStyle.blinkConfig?.frequency ?? 1.0
+       // 应用参数到动画
+   ```
+
+2. **字体特效应用** - 创建 ViewModifier
+   ```swift
+   // 艺术字效果
+   struct ArtisticTextModifier: ViewModifier {
+       let config: ArtisticStyleConfig
+       // 应用描边、阴影、发光、渐变等
+   }
+
+   // 霓虹字效果
+   struct NeonTextModifier: ViewModifier {
+       let config: NeonStyleConfig
+       // 应用多层发光、脉冲、故障等效果
+   }
+   ```
+
+3. **预览文字应用特效**
+   ```swift
+   Text(previewText)
+       .modifier(FontStyleModifier(...))
+       // 根据字体样式添加特效
+       .if(bannerStyle.fontStyle == .artistic) { view in
+           view.modifier(ArtisticTextModifier(config: bannerStyle.artisticConfig))
+       }
+       .if(bannerStyle.fontStyle == .neon) { view in
+           view.modifier(NeonTextModifier(config: bannerStyle.neonConfig))
+       }
+   ```
 
 ### 4.2 订阅引导
 
@@ -341,20 +495,33 @@ extension SubscriptionManager {
 ### Phase 1: 数据模型
 1. 新增 `ArtisticStyle` 枚举
 2. 新增 `ArtisticStyleConfig` 结构体
-3. 新增各动效 Config 结构体
-4. 更新 `BannerStyle`
+3. 新增 `NeonStyle` 枚举
+4. 新增 `NeonStyleConfig` 结构体
+5. 新增各动效 Config 结构体
+6. 更新 `BannerStyle` 添加 `neonStyle` 和 `neonConfig` 字段
 
 ### Phase 2: 渲染实现
 1. 更新 `FontStyleModifier` 支持新艺术字风格
-2. 更新 `BannerDisplayView` 各动效视图读取 Config
+2. 创建 `ArtisticTextModifier` 艺术字特效
+3. 创建 `NeonTextModifier` 霓虹字特效
+4. 更新 `BannerDisplayView` 各动效视图读取 Config
+5. 更新预览块应用动效配置参数
+6. 更新预览块应用字体特效
 
 ### Phase 3: UI 实现
-1. 在 `StyleSettingsView` 新增艺术字样式区域
-2. 在 `StyleSettingsView` 新增动效参数区域
-3. 添加订阅权限判断和引导
+1. 修改 `artisticStyleSection` 添加条件显示逻辑（仅 `fontStyle == .artistic` 时显示）
+2. 创建 `neonStyleSection` 霓虹字配置区域（仅 `fontStyle == .neon` 时显示）
+3. 创建 `neonStyleButton` 霓虹风格按钮组件
+4. 创建 `neonCustomConfigView` 霓虹自定义参数视图
+5. 在 `StyleSettingsView` 新增动效参数区域
+6. 添加订阅权限判断和引导
 
 ### Phase 4: 预设风格渲染
-1. 实现各预设风格的视觉效果 (金属、火焰等)
+1. 实现各艺术字预设风格的视觉效果 (金属、火焰等)
+2. 实现各霓虹字预设风格的视觉效果 (脉冲、故障、彩虹等)
+
+### Phase 5: 本地化
+1. 添加霓虹字相关的本地化字符串
 
 ---
 
@@ -362,7 +529,10 @@ extension SubscriptionManager {
 
 | 文件 | 变更类型 | 说明 |
 |------|---------|------|
-| `Models/BannerModels.swift` | 修改 | 新增枚举、结构体，更新 BannerStyle |
-| `Views/BannerDisplayView.swift` | 修改 | 更新渲染逻辑读取 Config |
-| `Views/StyleSettingsView.swift` | 修改 | 新增艺术字和动效参数配置 UI |
-| `Managers/SubscriptionManager.swift` | 修改 | 新增权限判断方法 |
+| `Models/BannerModels.swift` | 修改 | 新增 NeonStyle、NeonStyleConfig，更新 BannerStyle |
+| `Views/BannerDisplayView.swift` | 修改 | 更新渲染逻辑读取 Config，应用字体特效 |
+| `Views/StyleSettingsView.swift` | 修改 | 条件显示逻辑，新增霓虹字和动效参数配置 UI |
+| `Views/Modifiers/ArtisticTextModifier.swift` | 新增 | 艺术字特效 ViewModifier |
+| `Views/Modifiers/NeonTextModifier.swift` | 新增 | 霓虹字特效 ViewModifier |
+| `Managers/SubscriptionManager.swift` | 修改 | 新增霓虹字权限判断方法 |
+| `Resources/zh-Hans.lproj/Localizable.strings` | 修改 | 新增霓虹字本地化字符串 |
