@@ -63,7 +63,7 @@ struct ContentView: View {
     @State private var typewriterIndex: Int = 0
     @State private var flashOpacities: [Double] = Array(repeating: 0, count: 3)
     @State private var flashPositions: [CGPoint] = Array(repeating: .zero, count: 3)
-    @State private var particles: [ParticleData] = []
+    @State private var particles: [Particle] = []
     @State private var ledPhase: CGFloat = 0
     @State private var animationTimer: Timer?
     @State private var flashTimer: Timer?
@@ -1505,11 +1505,13 @@ struct ContentView: View {
 
     private func startParticlesAnimation() {
         particles = (0..<15).map { _ in
-            ParticleData(
+            Particle(
                 x: CGFloat.random(in: -80...80),
                 y: CGFloat.random(in: -40...40),
-                opacity: Double.random(in: 0.3...1.0),
-                size: CGFloat.random(in: 2...5)
+                size: CGFloat.random(in: 2...5),
+                color: .white,
+                speed: CGFloat.random(in: 0.5...1.5),
+                opacity: Double.random(in: 0.3...1.0)
             )
         }
 
@@ -1519,11 +1521,13 @@ struct ContentView: View {
                 particles[i].opacity -= 0.02
 
                 if particles[i].opacity <= 0 {
-                    particles[i] = ParticleData(
+                    particles[i] = Particle(
                         x: CGFloat.random(in: -80...80),
                         y: 40,
-                        opacity: 1.0,
-                        size: CGFloat.random(in: 2...5)
+                        size: CGFloat.random(in: 2...5),
+                        color: .white,
+                        speed: CGFloat.random(in: 0.5...1.5),
+                        opacity: 1.0
                     )
                 }
             }
@@ -1597,15 +1601,6 @@ struct SettingsCard<Content: View>: View {
                 .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
         )
     }
-}
-
-// MARK: - 粒子数据
-struct ParticleData: Identifiable {
-    let id = UUID()
-    var x: CGFloat
-    var y: CGFloat
-    var opacity: Double
-    var size: CGFloat
 }
 
 // MARK: - 预览字体样式修饰符

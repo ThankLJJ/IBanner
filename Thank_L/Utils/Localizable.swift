@@ -132,6 +132,52 @@ enum L10n {
         static let textSettingsTitle = NSLocalizedString("style.textSettingsTitle", value: "Text Color", comment: "Text color picker title")
         static let bgColorTitle = NSLocalizedString("style.bgColorTitle", value: "Background Color", comment: "Background color picker title")
         static let selectColor = NSLocalizedString("style.selectColor", value: "Select Color", comment: "Color picker title")
+
+        // Animation Config
+        static let breathingConfig = NSLocalizedString("style.breathingConfig", value: "Breathing Config", comment: "Breathing animation config")
+        static let waveConfig = NSLocalizedString("style.waveConfig", value: "Wave Config", comment: "Wave animation config")
+        static let bounceConfig = NSLocalizedString("style.bounceConfig", value: "Bounce Config", comment: "Bounce animation config")
+        static let ledConfig = NSLocalizedString("style.ledConfig", value: "LED Config", comment: "LED animation config")
+
+        // Artistic & Neon Style
+        static let artisticStyle = NSLocalizedString("style.artisticStyle", value: "Artistic Style", comment: "Artistic style section")
+        static let neonStyle = NSLocalizedString("style.neonStyle", value: "Neon Style", comment: "Neon style section")
+        static let customConfig = NSLocalizedString("style.customConfig", value: "Custom Config", comment: "Custom config section")
+        static let animationConfig = NSLocalizedString("style.animationConfig", value: "Animation Config", comment: "Animation config section")
+        static let blinkConfig = NSLocalizedString("style.blinkConfig", value: "Blink Config", comment: "Blink animation config")
+
+        // Animation Parameters
+        static let minScale = NSLocalizedString("style.minScale", value: "Min Scale", comment: "Minimum scale")
+        static let amplitude = NSLocalizedString("style.amplitude", value: "Amplitude", comment: "Wave amplitude")
+        static let bounceHeight = NSLocalizedString("style.bounceHeight", value: "Bounce Height", comment: "Bounce height")
+        static let ledSize = NSLocalizedString("style.ledSize", value: "LED Size", comment: "LED dot size")
+
+        // Additional
+        static let selectStyle = NSLocalizedString("style.selectStyle", value: "Select Style", comment: "Select style")
+        static let glowColor = NSLocalizedString("style.glowColor", value: "Glow Color", comment: "Glow color")
+        static let minOpacity = NSLocalizedString("style.minOpacity", value: "Min Opacity", comment: "Minimum opacity")
+        static let maxScale = NSLocalizedString("style.maxScale", value: "Max Scale", comment: "Maximum scale")
+        static let frequency = NSLocalizedString("style.frequency", value: "Frequency", comment: "Frequency")
+        static let glowIntensity = NSLocalizedString("style.glowIntensity", value: "Glow Intensity", comment: "Glow intensity")
+        static let glowRadius = NSLocalizedString("style.glowRadius", value: "Glow Radius", comment: "Glow radius")
+        static let elasticity = NSLocalizedString("style.elasticity", value: "Elasticity", comment: "Elasticity")
+        static let ledSpacing = NSLocalizedString("style.ledSpacing", value: "LED Spacing", comment: "LED spacing")
+        static let ledGlowIntensity = NSLocalizedString("style.ledGlowIntensity", value: "LED Glow", comment: "LED glow intensity")
+
+        // Artistic Config
+        static let strokeWidth = NSLocalizedString("style.strokeWidth", value: "Stroke Width", comment: "Stroke width")
+        static let strokeColor = NSLocalizedString("style.strokeColor", value: "Stroke Color", comment: "Stroke color")
+        static let shadowRadius = NSLocalizedString("style.shadowRadius", value: "Shadow Radius", comment: "Shadow radius")
+        static let shadowOpacity = NSLocalizedString("style.shadowOpacity", value: "Shadow Opacity", comment: "Shadow opacity")
+        static let materialIntensity = NSLocalizedString("style.materialIntensity", value: "Material Intensity", comment: "Material intensity")
+        static let atmosphereIntensity = NSLocalizedString("style.atmosphereIntensity", value: "Atmosphere Intensity", comment: "Atmosphere intensity")
+
+        // Neon Config
+        static let glitchIntensity = NSLocalizedString("style.glitchIntensity", value: "Glitch Intensity", comment: "Glitch intensity")
+        static let gradientEndColor = NSLocalizedString("style.gradientEndColor", value: "Gradient End Color", comment: "Gradient end color")
+        static let enableMultipleLayers = NSLocalizedString("style.enableMultipleLayers", value: "Enable Multiple Layers", comment: "Enable multiple layers")
+        static let secondaryGlowColor = NSLocalizedString("style.secondaryGlowColor", value: "Secondary Glow Color", comment: "Secondary glow color")
+        static let secondaryGlowRadius = NSLocalizedString("style.secondaryGlowRadius", value: "Secondary Glow Radius", comment: "Secondary glow radius")
     }
 
     // MARK: - Font Styles
