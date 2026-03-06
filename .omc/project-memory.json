@@ -107,6 +107,139 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "Thank_L/Views/ContentView.swift",
+      "accessCount": 6,
+      "lastAccessed": 1772763849256,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettings/StyleSettingsSections.swift",
+      "accessCount": 4,
+      "lastAccessed": 1772763667311,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplayView.swift",
+      "accessCount": 4,
+      "lastAccessed": 1772763700263,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1772762906221,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/BannerStyleModifiers.swift",
+      "accessCount": 3,
+      "lastAccessed": 1772763304801,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views",
+      "accessCount": 2,
+      "lastAccessed": 1772762821018,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettings/StyleSettingsPreview.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772762821067,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/BannerAnimationViews.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772762914733,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettings/StyleSettingsComponents.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772762921518,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettings/AnimationConfigViews.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772765131206,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettings",
+      "accessCount": 1,
+      "lastAccessed": 1772762813640,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Models/BannerModels.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772762813656,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettings/StyleSettingsSheets.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772762820998,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/StyleSettingsView.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772762825308,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L",
+      "accessCount": 1,
+      "lastAccessed": 1772762825331,
+      "type": "directory"
+    },
+    {
+      "path": "Thank_L/Models/AnimationModels.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772762828718,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/BannerDisplayModels.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772762921550,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/Modifiers/FontStyleModifier.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772763429365,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/Modifiers/ArtisticStyleModifier.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772763430437,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/Modifiers/NeonStyleModifier.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772763431525,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/BannerDisplay/BannerDisplayTimer.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772763732463,
+      "type": "file"
+    },
+    {
+      "path": "Thank_L/Views/Components/ContentViewComponents.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772764896980,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }

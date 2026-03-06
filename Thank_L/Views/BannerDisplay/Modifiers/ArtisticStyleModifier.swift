@@ -1,43 +1,11 @@
 //
-//  BannerStyleModifiers.swift
+//  ArtisticStyleModifier.swift
 //  Thank_L
 //
-//  Created by L on 2024/7/13.
+//  艺术字样式 - 包含14种风格实现
 //
 
 import SwiftUI
-
-struct FontStyleModifier: ViewModifier {
-    let fontStyle: FontStyle
-    let artisticStyle: ArtisticStyle
-    let artisticConfig: ArtisticStyleConfig
-    let neonStyle: NeonStyle
-    let neonConfig: NeonStyleConfig
-    let textColor: Color
-
-    func body(content: Content) -> some View {
-        switch fontStyle {
-        case .normal:
-            content
-
-        case .artistic:
-            content
-                .modifier(ArtisticStyleModifier(
-                    artisticStyle: artisticStyle,
-                    artisticConfig: artisticConfig,
-                    textColor: textColor
-                ))
-
-        case .neon:
-            content
-                .modifier(NeonStyleModifier(
-                    neonStyle: neonStyle,
-                    neonConfig: neonConfig,
-                    textColor: textColor
-                ))
-        }
-    }
-}
 
 struct ArtisticStyleModifier: ViewModifier {
     let artisticStyle: ArtisticStyle
@@ -93,6 +61,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 金属质感
     @ViewBuilder
     private func metallicStyle(_ content: Content) -> some View {
         ZStack {
@@ -117,6 +86,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 玻璃质感
     @ViewBuilder
     private func glassStyle(_ content: Content) -> some View {
         content
@@ -135,6 +105,7 @@ struct ArtisticStyleModifier: ViewModifier {
             .shadow(color: textColor.opacity(0.3), radius: 4, x: 0, y: 2)
     }
 
+    // MARK: - 木纹质感
     @ViewBuilder
     private func woodStyle(_ content: Content) -> some View {
         ZStack {
@@ -156,6 +127,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 石头质感
     @ViewBuilder
     private func stoneStyle(_ content: Content) -> some View {
         content
@@ -173,6 +145,7 @@ struct ArtisticStyleModifier: ViewModifier {
             .shadow(color: .black.opacity(0.3), radius: 1, x: 1, y: 1)
     }
 
+    // MARK: - 火焰效果
     @ViewBuilder
     private func fireStyle(_ content: Content) -> some View {
         ZStack {
@@ -197,6 +170,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 冰霜效果
     @ViewBuilder
     private func iceStyle(_ content: Content) -> some View {
         ZStack {
@@ -220,6 +194,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 电流效果
     @ViewBuilder
     private func electricStyle(_ content: Content) -> some View {
         content
@@ -230,6 +205,7 @@ struct ArtisticStyleModifier: ViewModifier {
             .shadow(color: .cyan, radius: 15, x: 0, y: 0)
     }
 
+    // MARK: - 烟雾效果
     @ViewBuilder
     private func smokeStyle(_ content: Content) -> some View {
         content
@@ -239,6 +215,7 @@ struct ArtisticStyleModifier: ViewModifier {
             .shadow(color: .gray.opacity(0.2), radius: 15, x: 0, y: 0)
     }
 
+    // MARK: - 复古风格
     @ViewBuilder
     private func retroStyle(_ content: Content) -> some View {
         ZStack {
@@ -260,6 +237,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 赛博朋克
     @ViewBuilder
     private func cyberpunkStyle(_ content: Content) -> some View {
         content
@@ -270,6 +248,7 @@ struct ArtisticStyleModifier: ViewModifier {
             .shadow(color: Color(red: 1, green: 0, blue: 1).opacity(0.6), radius: 10, x: 0, y: 0)
     }
 
+    // MARK: - 卡通描边
     @ViewBuilder
     private func cartoonStyle(_ content: Content) -> some View {
         ZStack {
@@ -290,6 +269,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
+    // MARK: - 手写风格
     @ViewBuilder
     private func handwrittenStyle(_ content: Content) -> some View {
         content
@@ -298,6 +278,7 @@ struct ArtisticStyleModifier: ViewModifier {
             .shadow(color: textColor.opacity(0.2), radius: 1, x: 1, y: 1)
     }
 
+    // MARK: - 书法风格
     @ViewBuilder
     private func calligraphyStyle(_ content: Content) -> some View {
         ZStack {
@@ -320,11 +301,7 @@ struct ArtisticStyleModifier: ViewModifier {
         }
     }
 
-    private func unitPointFromAngle(_ degrees: Double) -> UnitPoint {
-        let radians = degrees * .pi / 180
-        return UnitPoint(x: 0.5 + 0.5 * cos(radians), y: 0.5 + 0.5 * sin(radians))
-    }
-
+    // MARK: - 自定义样式
     @ViewBuilder
     private func customStyle(_ content: Content) -> some View {
         if artisticConfig.strokeWidth > 0 || artisticConfig.shadowBlur > 0 || artisticConfig.outerGlowRadius > 0 {
@@ -397,215 +374,10 @@ struct ArtisticStyleModifier: ViewModifier {
             }
         }
     }
-}
 
-struct NeonStyleModifier: ViewModifier {
-    let neonStyle: NeonStyle
-    let neonConfig: NeonStyleConfig
-    let textColor: Color
-
-    func body(content: Content) -> some View {
-        switch neonStyle {
-        case .basic:
-            basicNeon(content)
-
-        case .soft:
-            softNeon(content)
-
-        case .sharp:
-            sharpNeon(content)
-
-        case .pulse:
-            pulseNeon(content)
-
-        case .flicker:
-            flickerNeon(content)
-
-        case .breathing:
-            breathingNeon(content)
-
-        case .glitch:
-            glitchNeon(content)
-
-        case .gradient:
-            gradientNeon(content)
-
-        case .rainbow:
-            rainbowNeon(content)
-
-        case .cyberpunk:
-            cyberpunkNeon(content)
-
-        case .retro:
-            retroNeon(content)
-
-        case .custom:
-            customNeon(content)
-        }
-    }
-
-    @ViewBuilder
-    private func basicNeon(_ content: Content) -> some View {
-        content
-            .foregroundColor(neonConfig.glowColor)
-            .shadow(color: neonConfig.glowColor.opacity(0.5), radius: CGFloat(neonConfig.glowRadius * 0.2), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.6 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.4), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.7), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func softNeon(_ content: Content) -> some View {
-        content
-            .foregroundColor(neonConfig.glowColor)
-            .shadow(color: neonConfig.glowColor.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 1.5), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func sharpNeon(_ content: Content) -> some View {
-        content
-            .foregroundColor(neonConfig.glowColor)
-            .shadow(color: neonConfig.glowColor.opacity(0.8 * neonConfig.glowIntensity), radius: 1, x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: 2, x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.6 * neonConfig.glowIntensity), radius: 4, x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func pulseNeon(_ content: Content) -> some View {
-        content
-            .foregroundColor(neonConfig.glowColor)
-            .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func flickerNeon(_ content: Content) -> some View {
-        content
-            .foregroundColor(neonConfig.glowColor)
-            .shadow(color: neonConfig.glowColor.opacity(0.6 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.9 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func breathingNeon(_ content: Content) -> some View {
-        content
-            .foregroundColor(neonConfig.glowColor)
-            .shadow(color: neonConfig.glowColor.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.4), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.8), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func glitchNeon(_ content: Content) -> some View {
-        ZStack {
-            content
-                .foregroundColor(.red.opacity(0.7))
-                .offset(x: CGFloat(neonConfig.glitchIntensity * 3), y: 0)
-
-            content
-                .foregroundColor(.cyan.opacity(0.7))
-                .offset(x: CGFloat(-neonConfig.glitchIntensity * 3), y: 0)
-
-            basicNeon(content)
-        }
-    }
-
-    @ViewBuilder
-    private func gradientNeon(_ content: Content) -> some View {
-        let endColor = neonConfig.gradientEndColor ?? neonConfig.glowColor.opacity(0.5)
-        content
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [neonConfig.glowColor, endColor, neonConfig.glowColor],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
-            .shadow(color: neonConfig.glowColor.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func rainbowNeon(_ content: Content) -> some View {
-        content
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [.red, .orange, .yellow, .green, .blue, .purple, .pink],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .shadow(color: .white.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
-            .shadow(color: .purple.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
-            .shadow(color: .blue.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-    }
-
-    @ViewBuilder
-    private func cyberpunkNeon(_ content: Content) -> some View {
-        ZStack {
-            content
-                .foregroundColor(.purple.opacity(0.3))
-                .shadow(color: .purple.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 1.5), x: 0, y: 0)
-
-            content
-                .foregroundColor(.cyan)
-                .shadow(color: .cyan.opacity(0.6 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-
-            content
-                .foregroundColor(.pink)
-                .shadow(color: .pink.opacity(0.4 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
-        }
-    }
-
-    @ViewBuilder
-    private func retroNeon(_ content: Content) -> some View {
-        ZStack {
-            content
-                .foregroundColor(.red.opacity(0.3))
-                .offset(x: 2, y: 2)
-
-            content
-                .foregroundColor(.orange.opacity(0.6))
-                .shadow(color: .orange.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.5), x: 0, y: 0)
-
-            content
-                .foregroundColor(.yellow)
-                .shadow(color: .yellow.opacity(0.8 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-        }
-    }
-
-    @ViewBuilder
-    private func customNeon(_ content: Content) -> some View {
-        if let gradientEnd = neonConfig.gradientEndColor {
-            content
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [neonConfig.glowColor, gradientEnd],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.secondaryGlowRadius), x: 0, y: 0)
-        } else if neonConfig.enableMultipleLayers, let secondaryColor = neonConfig.secondaryGlowColor {
-            content
-                .foregroundColor(neonConfig.glowColor)
-                .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-                .shadow(color: secondaryColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.secondaryGlowRadius * 0.5), x: 0, y: 0)
-                .shadow(color: secondaryColor.opacity(0.3 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.secondaryGlowRadius), x: 0, y: 0)
-        } else {
-            content
-                .foregroundColor(neonConfig.glowColor)
-                .shadow(color: neonConfig.glowColor.opacity(0.5 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.3), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(0.7 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius * 0.6), x: 0, y: 0)
-                .shadow(color: neonConfig.glowColor.opacity(1.0 * neonConfig.glowIntensity), radius: CGFloat(neonConfig.glowRadius), x: 0, y: 0)
-        }
+    // MARK: - 辅助方法
+    private func unitPointFromAngle(_ degrees: Double) -> UnitPoint {
+        let radians = degrees * .pi / 180
+        return UnitPoint(x: 0.5 + 0.5 * cos(radians), y: 0.5 + 0.5 * sin(radians))
     }
 }
